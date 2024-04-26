@@ -387,7 +387,7 @@ public:
 	
 	// debugger
 #ifdef USE_DEBUGGER
-	void open_debugger(int cpu_index);
+	void open_debugger(int cpu_index, const _TCHAR* file_path);
 	void close_debugger();
 	bool is_debugger_enabled(int cpu_index);
 	bool now_debugging;

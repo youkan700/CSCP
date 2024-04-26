@@ -293,6 +293,9 @@ VM::VM(EMU* parent_emu) : VM_TEMPLATE(parent_emu)
 	// cpu bus
 	cpu->set_context_mem(memory);
 	cpu->set_context_io(io);
+#ifdef DIRECT_LOAD_MZT
+	cpu->set_context_mzt(memory);
+#endif
 #ifdef USE_DEBUGGER
 	cpu->set_context_debugger(new DEBUGGER(this, emu));
 #endif
@@ -532,6 +535,10 @@ void VM::set_sound_device_volume(int ch, int decibel_l, int decibel_r)
 
 void VM::play_tape(int drv, const _TCHAR* file_path)
 {
+#ifdef DIRECT_LOAD_MZT
+	if (memory->play_tape_mzt(file_path)) return;
+#endif
+
 	bool remote = drec->get_remote();
 	
 	if(drec->play_tape(file_path) && remote) {

@@ -723,7 +723,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		case ID_OPEN_DEBUGGER0: case ID_OPEN_DEBUGGER1: case ID_OPEN_DEBUGGER2: case ID_OPEN_DEBUGGER3:
 		case ID_OPEN_DEBUGGER4: case ID_OPEN_DEBUGGER5: case ID_OPEN_DEBUGGER6: case ID_OPEN_DEBUGGER7:
 			if(emu) {
-				emu->open_debugger(LOWORD(wParam) - ID_OPEN_DEBUGGER0);
+				emu->open_debugger(LOWORD(wParam) - ID_OPEN_DEBUGGER0, NULL);
 			}
 			break;
 		case ID_CLOSE_DEBUGGER:
@@ -961,6 +961,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 					emu->set_host_window_size(-1, -1, !now_fullscreen);
 				#endif
 			}
+			break;
+		case ID_HOST_ABOUT:
+			MessageBox(hWnd,
+				   "Common Source Code Project\n"
+				   _T(DEVICE_NAME) " Emulator\n"
+				   "\t\tby TAKEDA, Toshiya\n\n"
+				   "Based on version 2024/01/01\n\n"
+				   "Patched by youkan\n",
+				   "About", MB_OK);
 			break;
 		case ID_SCREEN_WINDOW + 0: case ID_SCREEN_WINDOW + 1: case ID_SCREEN_WINDOW + 2: case ID_SCREEN_WINDOW + 3: case ID_SCREEN_WINDOW + 4:
 		case ID_SCREEN_WINDOW + 5: case ID_SCREEN_WINDOW + 6: case ID_SCREEN_WINDOW + 7: case ID_SCREEN_WINDOW + 8: case ID_SCREEN_WINDOW + 9:
@@ -1350,6 +1359,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			break; \
 		case ID_DIRECT_LOAD_MZT: \
 			config.direct_load_mzt[drv] = !config.direct_load_mzt[drv]; \
+			if(emu) { \
+				emu->update_config(); \
+			} \
 			break; \
 		case ID_TAPE_BAUD_LOW: \
 			config.baud_high[drv] = false; \
@@ -3270,6 +3282,12 @@ void open_any_file(const _TCHAR* path)
 		UPDATE_HISTORY(path, config.recent_bubble_casette_path[0]);
 		my_tcscpy_s(config.initial_bubble_casette_dir, _MAX_PATH, get_parent_dir(path));
 		emu->open_bubble_casette(0, path, 0);
+		return;
+	}
+#endif
+#if defined(USE_DEBUGGER)
+	if(check_file_extension(path, _T(".dbs"))) {
+		emu->open_debugger(0, path);
 		return;
 	}
 #endif

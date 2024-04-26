@@ -68,7 +68,14 @@ private:
 #elif defined(_MZ1500)
 	uint8_t pcg_bank;
 #endif
-	
+
+#ifdef DIRECT_LOAD_MZT
+	uint8_t ipl_patched[0x1000];	// IPL 4KB (patched)
+	uint8_t *mzt_buffer;
+	int      mzt_buffer_ptr;
+	int      mzt_buffer_size;
+#endif
+
 	void update_map_low();
 	void update_map_middle();
 	void update_map_high();
@@ -131,6 +138,9 @@ public:
 #if defined(_MZ800)
 	void update_config();
 #endif
+#if defined(DIRECT_LOAD_MZT) && (defined(_MZ700) || defined(_MZ1500))
+	void update_config();
+#endif
 	void event_vline(int v, int clock);
 	void event_callback(int event_id, int err);
 	void write_data8(uint32_t addr, uint32_t data);
@@ -169,6 +179,11 @@ public:
 	}
 #endif
 	void draw_screen();
+
+#ifdef DIRECT_LOAD_MZT
+	bool play_tape_mzt(const _TCHAR* file_path);
+	bool bios_ret_z80(uint16_t PC, pair32_t* af, pair32_t* bc, pair32_t* de, pair32_t* hl, pair32_t* ix, pair32_t* iy, uint8_t* iff1);
+#endif
 };
 
 #endif

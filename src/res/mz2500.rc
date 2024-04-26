@@ -311,6 +311,8 @@ BEGIN
         MENUITEM "Use DirectInput",             ID_HOST_USE_DINPUT
         MENUITEM "Disable Windows 8 DWM",       ID_HOST_DISABLE_DWM
         MENUITEM "Show Status Bar",             ID_HOST_SHOW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "About...",                    ID_HOST_ABOUT
     END
 END
 

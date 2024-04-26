@@ -140,6 +140,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Waveform Shaper",             ID_USE_WAVE_SHAPER1
         MENUITEM SEPARATOR
+        MENUITEM "Load MZT Directly",           ID_DIRECT_LOAD_MZT1
+        MENUITEM SEPARATOR
         MENUITEM "Recent",                      ID_RECENT_TAPE1
     END
     POPUP "QD"
@@ -269,6 +271,8 @@ BEGIN
         MENUITEM "Use DirectInput",             ID_HOST_USE_DINPUT
         MENUITEM "Disable Windows 8 DWM",       ID_HOST_DISABLE_DWM
         MENUITEM "Show Status Bar",             ID_HOST_SHOW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "About...",                    ID_HOST_ABOUT
     END
 END
 

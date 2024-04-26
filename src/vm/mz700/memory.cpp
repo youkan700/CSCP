@@ -160,6 +160,25 @@ void MEMORY::initialize()
 	register_vline_event(this);
 	register_event_by_clock(this, EVENT_TEMPO, CPU_CLOCKS / 64, true, NULL);	// 32hz * 2
 	register_event_by_clock(this, EVENT_BLINK, CPU_CLOCKS / 3, true, NULL);	// 1.5hz * 2
+
+#ifdef DIRECT_LOAD_MZT
+	mzt_buffer = NULL;
+	mzt_buffer_ptr = 0;
+	mzt_buffer_size = 0;
+	memcpy(ipl_patched, ipl, 0x1000);
+
+	// patch for MZT direct load
+	if(ipl[0x04d8] == 0xf3 && ipl[0x04d9] == 0xd5 && ipl[0x04da] == 0xc5) {
+		ipl_patched[0x04d8] = 0xed;	/* RDINF entry */
+		ipl_patched[0x04d9] = 0xf0;
+		ipl_patched[0x04da] = 0x01;
+	}
+	if(ipl[0x04f8] == 0xf3 && ipl[0x04f9] == 0xd5 && ipl[0x04fa] == 0xc5) {
+		ipl_patched[0x04f8] = 0xed;	/* RDDATA entry */
+		ipl_patched[0x04f9] = 0xf0;
+		ipl_patched[0x04fa] = 0x02;
+	}
+#endif
 }
 
 void MEMORY::reset()
@@ -246,6 +265,12 @@ void MEMORY::update_config()
 		}
 	}
 	palette_mz800_pc[8] = palette_mz800_pc[7];
+}
+#endif
+#if defined(DIRECT_LOAD_MZT) && (defined(_MZ700) || defined(_MZ1500))
+void MEMORY::update_config()
+{
+	update_map_low();
 }
 #endif
 
@@ -799,7 +824,11 @@ void MEMORY::set_vsync(bool val)
 void MEMORY::update_map_low()
 {
 	if(mem_bank & MEM_BANK_MON_L) {
+#ifdef DIRECT_LOAD_MZT
+		SET_BANK(0x0000, 0x0fff, wdmy, config.direct_load_mzt[0] ? ipl_patched : ipl);
+#else
 		SET_BANK(0x0000, 0x0fff, wdmy, ipl);
+#endif
 	} else {
 		SET_BANK(0x0000, 0x0fff, ram, ram);
 	}
@@ -1205,6 +1234,88 @@ void MEMORY::draw_screen()
 		}
 	}
 	emu->screen_skip_line(true);
+}
+#endif
+
+#ifdef DIRECT_LOAD_MZT
+bool MEMORY::play_tape_mzt(const _TCHAR* file_path) {
+	if (config.direct_load_mzt[0] &&
+	    (check_file_extension(file_path, _T(".mzt")) ||
+	     check_file_extension(file_path, _T(".m12")) ||
+	     check_file_extension(file_path, _T(".mzf")))) {
+		FILEIO* fio = new FILEIO();
+		if(fio->Fopen(file_path, FILEIO_READ_BINARY)) {
+			fio->Fseek(0, FILEIO_SEEK_END);
+			int file_size = fio->Ftell();
+			fio->Fseek(0, FILEIO_SEEK_SET);
+			if (mzt_buffer != NULL) {
+				free(mzt_buffer);
+				mzt_buffer = NULL;
+                        }
+			mzt_buffer = (uint8_t *)malloc(file_size);
+			fio->Fread(mzt_buffer, file_size, 1);
+			mzt_buffer_ptr = 0;
+			mzt_buffer_size = file_size;
+                }
+		fio->Fclose();
+		delete fio;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+//
+// Load from MZT to (HL) with BC bytes
+//
+bool MEMORY::bios_ret_z80(uint16_t PC, pair32_t* af, pair32_t* bc, pair32_t* de, pair32_t* hl, pair32_t* ix, pair32_t* iy, uint8_t* iff1)
+{
+	#define A	af->b.h
+	#define F	af->b.l
+	#define BC	bc->w.l
+	#define HL	hl->w.l
+	
+	#define CF	0x01
+
+	int i;
+
+	if (mzt_buffer == NULL ||
+	    (mzt_buffer_ptr + BC > mzt_buffer_size)) {
+		F = CF;
+		return TRUE;
+        }
+
+	// if RDINF, apply mz700win patch
+	if (F & 1) {
+		uint8_t *header, *body;
+		uint16_t load_addr, load_size;
+		header = &mzt_buffer[mzt_buffer_ptr];
+		body = &header[128];
+		load_addr = header[0x14] | ((uint16_t)header[0x15] << 8);
+		load_size = header[0x12] | ((uint16_t)header[0x13] << 8);
+		if(load_addr == 0) load_addr = 0x1200;
+		if(header[0x40] == 'P' && header[0x41] == 'A' && header[0x42] == 'T' && header[0x43] == ':') {
+			int patch_ofs = 0x44;
+			for(; patch_ofs < 0x80; ) {
+				uint16_t patch_addr = header[patch_ofs] | ((uint16_t)header[patch_ofs + 1] << 8);
+				patch_ofs += 2;
+				if(patch_addr == 0xffff) {
+					break;
+				}
+				int patch_len = header[patch_ofs++];
+				if (patch_addr - load_addr + patch_len > load_size) break;
+				for(int i = 0; i < patch_len; i++) {
+					body[patch_addr - load_addr + i] = header[patch_ofs++];
+				}
+			}
+		}
+        }
+
+	for (i=0; i<BC; i++) {
+		write_data8(HL++, mzt_buffer[mzt_buffer_ptr++]);
+        }
+
+	A = F = 0;
+	return TRUE;
 }
 #endif
 

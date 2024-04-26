@@ -40,6 +40,9 @@ private:
 #ifdef SINGLE_MODE_DMA
 	DEVICE *d_dma;
 #endif
+#ifdef DIRECT_LOAD_MZT
+	DEVICE *d_mzt;
+#endif
 #ifdef USE_DEBUGGER
 	DEBUGGER *d_debugger;
 	DEVICE *d_mem_stored, *d_io_stored;
@@ -105,7 +108,10 @@ private:
 	void OP(uint8_t code);
 	void run_one_opecode();
 	void check_interrupt();
-	
+
+	void MZ700WIN_MZT_MON(uint8_t opr);
+	void MZ700WIN_MZT_BAS(uint8_t opr);
+
 	/* ---------------------------------------------------------------------------
 	debug
 	--------------------------------------------------------------------------- */
@@ -216,6 +222,12 @@ public:
 	void set_context_dma(DEVICE* device)
 	{
 		d_dma = device;
+	}
+#endif
+#ifdef DIRECT_LOAD_MZT
+	void set_context_mzt(DEVICE* device)
+	{
+		d_mzt = device;
 	}
 #endif
 #ifdef USE_DEBUGGER

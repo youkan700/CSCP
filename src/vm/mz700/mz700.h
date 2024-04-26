@@ -88,6 +88,7 @@
 #endif
 #define USE_DEBUGGER
 #define USE_STATE
+#define DIRECT_LOAD_MZT
 
 #if defined(_MZ700) || defined(_MZ1500)
 static const int vm_auto_key_table_base[][2] = {

@@ -332,7 +332,8 @@
 #define ID_HOST_USE_DINPUT              41210
 #define ID_HOST_DISABLE_DWM             41211
 #define ID_HOST_SHOW_STATUS_BAR         41212
-#define ID_HOST_MENU_END                41212
+#define ID_HOST_ABOUT                   41213
+#define ID_HOST_MENU_END                41213
 
 #define ID_SCREEN_MENU_START            41301
 #define ID_SCREEN_WINDOW                41301 // 41601-41610

@@ -286,7 +286,7 @@ void* debugger_thread(void *lpx)
 	
 	// initialize files
 	logfile = NULL;
-	cmdfile = NULL;
+//	cmdfile = NULL;
 	
 	_TCHAR command[MAX_COMMAND_LENGTH + 1];
 	_TCHAR prev_command[MAX_COMMAND_LENGTH + 1];
@@ -1596,7 +1596,7 @@ void EMU::release_debugger()
 	close_debugger();
 }
 
-void EMU::open_debugger(int cpu_index)
+void EMU::open_debugger(int cpu_index, const _TCHAR* file_path)
 {
 	if(!(now_debugging && debugger_thread_param.cpu_index == cpu_index)) {
 		close_debugger();
@@ -1606,6 +1606,15 @@ void EMU::open_debugger(int cpu_index)
 			debugger_thread_param.vm = vm;
 			debugger_thread_param.cpu_index = cpu_index;
 			debugger_thread_param.request_terminate = false;
+			cmdfile = NULL;
+			if (file_path != NULL) {
+				cmdfile = new FILEIO();
+				if(!cmdfile->Fopen(create_absolute_path(file_path), FILEIO_READ_ASCII)) {
+					delete cmdfile;
+					cmdfile = NULL;
+					my_printf(osd, _T("can't open %s\n"), file_path);
+				}
+			}
 #ifdef _MSC_VER
 			if((hDebuggerThread = (HANDLE)_beginthreadex(NULL, 0, debugger_thread, &debugger_thread_param, 0, NULL)) != (HANDLE)0) {
 #else

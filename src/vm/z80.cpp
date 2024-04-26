@@ -898,6 +898,71 @@ inline uint8_t Z80::SET(uint8_t bit, uint8_t value)
 	after_ei = true; \
 } while(0)
 
+#ifdef DIRECT_LOAD_MZT
+//--------------------------------------------------------------------
+//	MZ700Win compatible tape emulation instruction
+//
+//	ED F0 01	RDINF  (monitor)	Load Information block into 10F0h
+//	ED F0 02	RDDATA (monitor)	Load Data block into the address specified in (1104h) with length (1102h)
+//	ED F4 01	RDINF  (BASIC)		Load Information block into (HL)
+//	ED F4 02	RDDATA (BASIC)		Load Data block into (HL) with length BC
+//	ED F4 05	RDINF  (BASIC)		Load Information block into (HL)
+//	ED F4 06	RDDATA (BASIC)		Load Data block into (HL) with length BC
+//					OUT: A=0, Cy=0 ... no error
+//--------------------------------------------------------------------
+void Z80::MZ700WIN_MZT_MON(uint8_t opr) {
+	uint16_t save_BC, save_HL;
+	if(d_mzt != NULL) {
+	    save_BC = BC;
+	    save_HL = HL;
+	    switch(opr) {
+		case 0x01:
+		    F = 1;
+		    HL = 0x10F0;
+		    BC = 128;
+		    d_mzt->bios_ret_z80(prevpc, &af, &bc, &de, &hl, &ix, &iy, &iff1);
+		    break;
+		case 0x02:
+		    F = 0;
+		    RM16(0x1104, &hl);
+		    RM16(0x1102, &bc);
+		    d_mzt->bios_ret_z80(prevpc, &af, &bc, &de, &hl, &ix, &iy, &iff1);
+		    break;
+		default:
+		    break;
+	    }
+	    BC = save_BC;
+	    HL = save_HL;
+	}
+	POP(pc); WZ = PCD;
+}
+void Z80::MZ700WIN_MZT_BAS(uint8_t opr) {
+	uint16_t save_BC, save_HL;
+	if(d_mzt != NULL) {
+	    save_BC = BC;
+	    save_HL = HL;
+	    switch(opr) {
+		case 0x01:
+		case 0x05:
+		    F = 1;
+		    BC = 128;
+		    d_mzt->bios_ret_z80(prevpc, &af, &bc, &de, &hl, &ix, &iy, &iff1);
+		    break;
+		case 0x02:
+		case 0x06:
+		    F = 0;
+		    d_mzt->bios_ret_z80(prevpc, &af, &bc, &de, &hl, &ix, &iy, &iff1);
+		    break;
+		default:
+		    break;
+	    }
+	    BC = save_BC;
+	    HL = save_HL;
+	}
+	POP(pc); WZ = PCD;
+}
+#endif //DIRECT_LOAD_MZT
+
 void Z80::OP_CB(uint8_t code)
 {
 	// Done: M1 + M1
@@ -1718,6 +1783,21 @@ void Z80::OP_ED(uint8_t code)
 	case 0xb9: CPDR(); break;						/* CPDR             */
 	case 0xba: INDR(); break;						/* INDR             */
 	case 0xbb: OTDR(); break;						/* OTDR             */
+#ifdef DIRECT_LOAD_MZT
+	//--------------------------------------------------------------------
+	//	MZ700Win compatible tape emulation instruction
+	//
+	//	ED F0 01	RDINF  (monitor)	Load Information block into 10F0h
+	//	ED F0 02	RDDATA (monitor)	Load Data block into the address specified in (1104h) with length (1102h)
+	//	ED F4 01	RDINF  (BASIC)		Load Information block into (HL)
+	//	ED F4 02	RDDATA (BASIC)		Load Data block into (HL) with length BC
+	//	ED F4 05	RDINF  (BASIC)		Load Information block into (HL)
+	//	ED F4 06	RDDATA (BASIC)		Load Data block into (HL) with length BC
+	//					OUT: A=0, Cy=0 ... no error
+	//--------------------------------------------------------------------
+	case 0xf0: MZ700WIN_MZT_MON(FETCH8()); break;
+	case 0xf4: MZ700WIN_MZT_BAS(FETCH8()); break;
+#endif
 	default:   OP(code); break;
 	}
 }
