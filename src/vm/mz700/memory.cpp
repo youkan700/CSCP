@@ -58,9 +58,7 @@
 #define MEM_BANK_CGROM		(MEM_BANK_CGROM_R | MEM_BANK_CGROM_W)
 #define MEM_BANK_VRAM		0x10
 #endif
-#if defined(_MZ800) || defined(_MZ1500)
 #define MEM_BANK_PCG		0x20
-#endif
 
 #if defined(_MZ800)
 #define MZ700_MODE	(dmd & 8)
@@ -473,8 +471,8 @@ void MEMORY::write_data8(uint32_t addr, uint32_t data)
 	}
 #else
 	// MZ-700/1500
-#if defined(_MZ1500)
 	if(mem_bank & MEM_BANK_PCG) {
+#if defined(_MZ1500)
 		if(0xd000 <= addr && addr <= 0xefff) {
 			// pcg wait
 			if(!blank_pcg) {
@@ -482,8 +480,8 @@ void MEMORY::write_data8(uint32_t addr, uint32_t data)
 				blank_pcg = true;
 			}
 		}
-	} else
 #endif
+	} else
 	if(mem_bank & MEM_BANK_MON_H) {
 		if(0xd000 <= addr && addr <= 0xdfff) {
 			// vram wait
@@ -609,8 +607,8 @@ uint32_t MEMORY::read_data8(uint32_t addr)
 	}
 #else
 	// MZ-700/1500
-#if defined(_MZ1500)
 	if(mem_bank & MEM_BANK_PCG) {
+#if defined(_MZ1500)
 		if(0xd000 <= addr && addr <= 0xefff) {
 			// pcg wait
 			if(!blank_pcg) {
@@ -618,8 +616,8 @@ uint32_t MEMORY::read_data8(uint32_t addr)
 				blank_pcg = true;
 			}
 		}
-	} else
 #endif
+	} else
 	if(mem_bank & MEM_BANK_MON_H) {
 		if(0xd000 <= addr && addr <= 0xdfff) {
 			// vram wait
@@ -716,14 +714,13 @@ void MEMORY::write_io8(uint32_t addr, uint32_t data)
 #if defined(_MZ800)
 		mem_bank &= ~MEM_BANK_CGROM_R;
 		mem_bank |= MEM_BANK_CGROM_W | MEM_BANK_VRAM;
-#elif defined(_MZ1500)
+#else
 		mem_bank &= ~MEM_BANK_PCG;
 #endif
 		update_map_low();
 		update_map_middle();
 		update_map_high();
 		break;
-#if defined(_MZ800) || defined(_MZ1500)
 	case 0xe5:
 		mem_bank |= MEM_BANK_PCG;
 #if defined(_MZ1500)
@@ -735,7 +732,6 @@ void MEMORY::write_io8(uint32_t addr, uint32_t data)
 		mem_bank &= ~MEM_BANK_PCG;
 		update_map_high();
 		break;
-#endif
 #if defined(_MZ800)
 	case 0xf0:
 		if(data & 0x40) {
@@ -881,8 +877,11 @@ void MEMORY::update_map_high()
 	}
 #else
 	// MZ-700/1500
-#if defined(_MZ1500)
 	if(mem_bank & MEM_BANK_PCG) {
+#if defined(_MZ700)
+		SET_BANK(0xd000, 0xffff, wdmy, rdmy);
+#endif
+#if defined(_MZ1500)
 		if(pcg_bank & 3) {
 			uint8_t *bank = pcg + ((pcg_bank & 3) - 1) * 0x2000;
 			SET_BANK(0xd000, 0xefff, bank, bank);
@@ -891,8 +890,8 @@ void MEMORY::update_map_high()
 			SET_BANK(0xe000, 0xefff, wdmy, font);
 		}
 		SET_BANK(0xf000, 0xffff, wdmy, rdmy);
-	} else {
 #endif
+	} else {
 		if(mem_bank & MEM_BANK_MON_H) {
 			SET_BANK(0xd000, 0xdfff, vram, vram);
 			SET_BANK(0xe000, 0xe7ff, wdmy, rdmy);
@@ -900,9 +899,7 @@ void MEMORY::update_map_high()
 		} else {
 			SET_BANK(0xd000, 0xffff, ram + 0xd000, ram + 0xd000);
 		}
-#if defined(_MZ1500)
 	}
-#endif
 #endif
 }
 
