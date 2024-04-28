@@ -69,6 +69,7 @@ BEGIN
     VK_RETURN,      ID_ACCEL_SCREEN,        VIRTKEY, ALT, NOINVERT
     VK_APPS,        ID_ACCEL_SPEED,         VIRTKEY, NOINVERT
     VK_APPS,        ID_ACCEL_ROMAJI,        VIRTKEY, CONTROL, NOINVERT
+    VK_F12,         ID_RESET,               VIRTKEY, NOINVERT
 END
 
 
@@ -81,7 +82,7 @@ IDR_MENU1 MENU DISCARDABLE
 BEGIN
     POPUP "Control"
     BEGIN
-        MENUITEM "Reset",                       ID_RESET
+        MENUITEM "Reset\aF12",                       ID_RESET
         MENUITEM SEPARATOR
         MENUITEM "CPU x1",                      ID_CPU_POWER0
         MENUITEM "CPU x2",                      ID_CPU_POWER1
