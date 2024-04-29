@@ -303,6 +303,7 @@ BEGIN
             MENUITEM "Joystick #1",             ID_INPUT_JOYSTICK0
             MENUITEM "Joystick #2",             ID_INPUT_JOYSTICK1
             MENUITEM "Joystick To Keyboard",    ID_INPUT_JOYTOKEY
+            MENUITEM "Cursor To 10-Key",        ID_INPUT_CURSORTO10KEY
         END
         MENUITEM SEPARATOR
         MENUITEM "Use Direct2D1",               ID_HOST_USE_D2D1

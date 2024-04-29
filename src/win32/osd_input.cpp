@@ -648,6 +648,19 @@ void OSD::key_down_native(int code, bool repeat)
 		code = VK_KANJI;
 		keep_frames = true;
 	}
+	if(config.use_cursor_to_10key) {
+		switch (code) {
+			case VK_LEFT:    code = VK_NUMPAD4; break;
+			case VK_UP:      code = VK_NUMPAD8; break;
+			case VK_RIGHT:   code = VK_NUMPAD6; break;
+			case VK_DOWN:    code = VK_NUMPAD2; break;
+			case VK_NUMPAD2: code = VK_DOWN;    break;
+			case VK_NUMPAD4: code = VK_LEFT;    break;
+			case VK_NUMPAD6: code = VK_RIGHT;   break;
+			case VK_NUMPAD8: code = VK_UP;      break;
+			default: break;
+		}
+	}
 	if(!(code == VK_LSHIFT || code == VK_RSHIFT || code == VK_LCONTROL || code == VK_RCONTROL || code == VK_LMENU || code == VK_RMENU)) {
 		code = keycode_conv[code];
 	}
@@ -687,6 +700,19 @@ void OSD::key_down_native(int code, bool repeat)
 
 void OSD::key_up_native(int code)
 {
+	if(config.use_cursor_to_10key) {
+		switch (code) {
+			case VK_LEFT:    code = VK_NUMPAD4; break;
+			case VK_UP:      code = VK_NUMPAD8; break;
+			case VK_RIGHT:   code = VK_NUMPAD6; break;
+			case VK_DOWN:    code = VK_NUMPAD2; break;
+			case VK_NUMPAD2: code = VK_DOWN;    break;
+			case VK_NUMPAD4: code = VK_LEFT;    break;
+			case VK_NUMPAD6: code = VK_RIGHT;   break;
+			case VK_NUMPAD8: code = VK_UP;      break;
+			default: break;
+		}
+	}
 	if(!(code == VK_LSHIFT || code == VK_RSHIFT || code == VK_LCONTROL || code == VK_RCONTROL || code == VK_LMENU || code == VK_RMENU)) {
 		code = keycode_conv[code];
 	}

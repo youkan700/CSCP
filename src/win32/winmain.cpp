@@ -1076,6 +1076,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 #endif
+		case ID_INPUT_CURSORTO10KEY:
+			config.use_cursor_to_10key = !config.use_cursor_to_10key;
+			break;
 #ifdef USE_VIDEO_CAPTURE
 		case ID_CAPTURE_FILTER:
 			if(emu) {
@@ -2110,6 +2113,7 @@ void update_host_sound_menu(HMENU hMenu)
 
 void update_host_input_menu(HMENU hMenu)
 {
+	CheckMenuItem(hMenu, ID_INPUT_CURSORTO10KEY, config.use_cursor_to_10key ? MF_CHECKED : MF_UNCHECKED);
 }
 
 #ifdef USE_VIDEO_CAPTURE
