@@ -385,7 +385,8 @@
 #define ID_INPUT_JOYSTICK6              41607
 #define ID_INPUT_JOYSTICK7              41608
 #define ID_INPUT_JOYTOKEY               41609
-#define ID_INPUT_MENU_END               41609
+#define ID_INPUT_CURSORTO10KEY          41610
+#define ID_INPUT_MENU_END               41610
 
 #define ID_CAPTURE_MENU_START           41701
 #define ID_CAPTURE_FILTER               41701

@@ -205,6 +205,7 @@ typedef struct {
 		int joy_to_key_type;
 		bool joy_to_key_numpad5;
 		int joy_to_key_buttons[16];
+		bool use_cursor_to_10key;
 	#endif
 	#if defined(USE_SHARED_DLL) || defined(USE_AUTO_KEY)
 		bool romaji_to_kana;

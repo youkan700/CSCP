@@ -370,6 +370,7 @@ void load_config(const _TCHAR* config_path)
 			config.joy_to_key_buttons[i] = MyGetPrivateProfileInt(_T("Input"), create_string(_T("JoyToKeyButtons%d"), i + 1), config.joy_to_key_buttons[i], config_path);
 		}
 	#endif
+		config.use_cursor_to_10key = MyGetPrivateProfileBool(_T("Input"), _T("UseCursorTo10Key"), config.use_cursor_to_10key, config_path);
 	
 	// printer
 	#ifdef USE_PRINTER
@@ -595,6 +596,7 @@ void save_config(const _TCHAR* config_path)
 			MyWritePrivateProfileInt(_T("Input"), create_string(_T("JoyToKeyButtons%d"), i + 1), config.joy_to_key_buttons[i], config_path);
 		}
 	#endif
+		MyWritePrivateProfileBool(_T("Input"), _T("UseCursorTo10Key"), config.use_cursor_to_10key, config_path);
 	
 	// win32
 	#ifdef _WIN32
