@@ -602,6 +602,7 @@ bool VM::is_frame_skippable()
 
 void VM::update_config()
 {
+	monitor_type = config.monitor_type;
 	for(DEVICE* device = first_device; device; device = device->next_device) {
 		device->update_config();
 	}
