@@ -23,13 +23,14 @@
 #define SCRN_320x200	3
 #define SCRN_320x400	4
 
-void CRTC::initialize()
+void CRTC::initialize_internal()
 {
 	// config
 	monitor_200line = ((config.monitor_type & 2) != 0);
 	scan_line = scan_tmp = (monitor_200line && config.scan_line);
 	monitor_digital = monitor_tmp = ((config.monitor_type & 1) != 0);
 	boot_mode = config.boot_mode;
+	timing_changed = false;
 	
 	// thanks Mr.Sato (http://x1center.org/)
 	if(monitor_200line) {
@@ -163,8 +164,15 @@ void CRTC::initialize()
 	vram_page = vram_mask = 0;
 	back_color = 0;
 	text_color = 7;
+}
+
+void CRTC::initialize()
+{
+	// initialize
+	initialize_internal();
 	
 	// register events
+	register_frame_event(this);
 	register_vline_event(this);
 	register_event(this, EVENT_BLINK, 500000, true, NULL);
 }
@@ -629,6 +637,16 @@ void CRTC::write_signal(int id, uint32_t data, uint32_t mask)
 	}
 }
 
+void CRTC::event_pre_frame()
+{
+	if(timing_changed) {
+		initialize_internal();
+		timing_changed = false;
+		vm->reset();
+        }
+
+}
+
 void CRTC::event_callback(int event_id, int err)
 {
 	if(event_id == EVENT_HDISP_TEXT_S) {
@@ -696,6 +714,9 @@ void CRTC::update_config()
 	//monitor_200line = ((config.monitor_type & 2) != 0);
 	scan_tmp = (monitor_200line && config.scan_line);
 	monitor_tmp = ((config.monitor_type & 1) != 0);
+	if (monitor_200line != ((config.monitor_type & 2) != 0)) {
+		timing_changed = true;
+	}
 }
 
 // ----------------------------------------------------------------------------

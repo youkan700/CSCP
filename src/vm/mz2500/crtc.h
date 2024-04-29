@@ -29,6 +29,7 @@ private:
 	bool monitor_200line;
 	bool monitor_digital, monitor_tmp;
 	int boot_mode;
+	bool timing_changed;
 	
 	double frames_per_sec;
 	int lines_per_frame, chars_per_line;
@@ -116,6 +117,8 @@ private:
 	void draw_screen_80b();
 	void draw_screen_2000();
 	
+	void initialize_internal();
+	
 public:
 	CRTC(VM_TEMPLATE* parent_vm, EMU* parent_emu) : DEVICE(parent_vm, parent_emu)
 	{
@@ -131,6 +134,7 @@ public:
 	void write_io8(uint32_t addr, uint32_t data);
 	uint32_t read_io8(uint32_t addr);
 	void write_signal(int id, uint32_t data, uint32_t mask);
+	void event_pre_frame();
 	void event_callback(int event_id, int err);
 	void event_vline(int v, int clock);
 	void update_config();
