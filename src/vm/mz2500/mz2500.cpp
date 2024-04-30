@@ -50,6 +50,7 @@
 #include "mz1e30.h"
 #include "mz1r13.h"
 #include "mz1r37.h"
+#include "mz1e32.h"
 #include "printer.h"
 #include "serial.h"
 #include "timer.h"
@@ -112,6 +113,7 @@ VM::VM(EMU* parent_emu) : VM_TEMPLATE(parent_emu)
 	mz1e30 = new MZ1E30(this, emu);
 	mz1r13 = new MZ1R13(this, emu);
 	mz1r37 = new MZ1R37(this, emu);
+	mz1e32 = new MZ1E32(this, emu);
 	printer = new PRINTER(this, emu);
 	serial = new SERIAL(this, emu);
 	timer = new TIMER(this, emu);
@@ -206,6 +208,7 @@ VM::VM(EMU* parent_emu) : VM_TEMPLATE(parent_emu)
 	io->set_iomap_range_rw(0xa4, 0xa5, mz1e30);
 	io->set_iomap_range_rw(0xa8, 0xa9, mz1e30);
 	io->set_iomap_range_rw(0xac, 0xad, mz1r37);
+	io->set_iomap_range_rw(0x9a, 0x9b, mz1e32);
 	io->set_iomap_single_w(0xae, crtc);
 	io->set_iomap_range_rw(0xb0, 0xb3, serial);
 	io->set_iomap_range_rw(0xb4, 0xb5, memory);
