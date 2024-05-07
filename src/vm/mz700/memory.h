@@ -41,7 +41,7 @@ private:
 #if defined(_MZ800)
 	uint8_t ext[0x2000];	// MZ-800 IPL 8KB
 #else
-	uint8_t ext[0x1800];	// MZ-700/1500 EXT 6KB
+	uint8_t ext[0x2000];	// MZ-700/1500 EXT 8KB
 #endif
 	uint8_t font[0x1000];	// CGROM 4KB
 #if defined(_MZ700)
