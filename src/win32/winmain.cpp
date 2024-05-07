@@ -968,8 +968,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 				   _T(DEVICE_NAME) " Emulator\n"
 				   "\t\tby TAKEDA, Toshiya\n\n"
 				   "Based on version 2024/01/01\n\n"
-				   "Patched by youkan\n",
-				   "About", MB_OK);
+				   "Patched by youkan"
+#ifdef NORA_VER
+				   "\tVer." NORA_VER
+#endif //NORA_VER
+				   ,"About", MB_OK);
 			break;
 		case ID_SCREEN_WINDOW + 0: case ID_SCREEN_WINDOW + 1: case ID_SCREEN_WINDOW + 2: case ID_SCREEN_WINDOW + 3: case ID_SCREEN_WINDOW + 4:
 		case ID_SCREEN_WINDOW + 5: case ID_SCREEN_WINDOW + 6: case ID_SCREEN_WINDOW + 7: case ID_SCREEN_WINDOW + 8: case ID_SCREEN_WINDOW + 9:
