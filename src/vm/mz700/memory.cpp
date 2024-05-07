@@ -112,20 +112,30 @@ void MEMORY::initialize()
 	}
 #if defined(_MZ800) || defined(_MZ1500)
 	if(fio->Fopen(create_local_path(_T(EXT_FILE_NAME)), FILEIO_READ_BINARY)) {
-		fio->Fread(ext, sizeof(ext), 1);
+		uint32_t rom_size;
+		fio->Fseek(0, FILEIO_SEEK_END);
+		rom_size = fio->Ftell();
+		fio->Fseek(0, FILEIO_SEEK_SET);
+		if(rom_size == 0x1800) {
+			// 6KB: Load to E800h
+			fio->Fread(ext + 0x800, rom_size, 1);
+                } else if(rom_size == 0x2000) {
+			// 8KB: Load to E000h
+			fio->Fread(ext, rom_size, 1);
+                }
 		fio->Fclose();
 	}
 #else
 	if((config.dipswitch & 8) && fio->Fopen(create_local_path(_T("MZ1R12.ROM")), FILEIO_READ_BINARY)) {
-		fio->Fread(ext, 0x800, 1);
+		fio->Fread(ext + 0x800, 0x800, 1);
 		fio->Fclose();
 	}
 	if((config.dipswitch & 4) && fio->Fopen(create_local_path(_T("MZ1E14.ROM")), FILEIO_READ_BINARY)) {
-		fio->Fread(ext, 0x800, 1);
+		fio->Fread(ext + 0x800, 0x800, 1);
 		fio->Fclose();
 	}
 	if((config.dipswitch & 2) && fio->Fopen(create_local_path(_T("MZ1E05.ROM")), FILEIO_READ_BINARY)) {
-		fio->Fread(ext + 0x800, 0x1000, 1);
+		fio->Fread(ext + 0x1000, 0x1000, 1);
 		fio->Fclose();
 	}
 #endif
@@ -895,7 +905,7 @@ void MEMORY::update_map_high()
 		if(mem_bank & MEM_BANK_MON_H) {
 			SET_BANK(0xd000, 0xdfff, vram, vram);
 			SET_BANK(0xe000, 0xe7ff, wdmy, rdmy);
-			SET_BANK(0xe800, 0xffff, wdmy, ext );
+			SET_BANK(0xe000, 0xffff, wdmy, ext );
 		} else {
 			SET_BANK(0xd000, 0xffff, ram + 0xd000, ram + 0xd000);
 		}
