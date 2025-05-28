@@ -44,7 +44,7 @@ void MZ1E32::reset()
 void MZ1E32::write_io8(uint32_t addr, uint32_t data)
 {
 	if ((addr & 0xff) == 0x9A) {
-		rom_address = ((rom_address << 8) | data) & 0x00FFFFFF;
+		rom_address = ((rom_address << 8) | data) & 0x000FFFFF;
 	}
 }
 

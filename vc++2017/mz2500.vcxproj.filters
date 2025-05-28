@@ -219,6 +219,9 @@
     <ClCompile Include="..\src\vm\mz2500\timer.cpp">
       <Filter>Source Files\VM Driver Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\vm\mz2500\mz1e32.cpp">
+      <Filter>Source Files\VM Driver Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\common.h">
@@ -392,6 +395,9 @@
     <ClInclude Include="..\src\res\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\vm\mz2500\mz1e32.h">
+      <Filter>Header Files\VM Driver Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\src\res\indicator\access_green.bmp">
@@ -411,5 +417,8 @@
     <ResourceCompile Include="..\src\res\mz2500.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="..\src\res\vista.manifest" />
   </ItemGroup>
 </Project>

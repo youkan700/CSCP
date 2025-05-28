@@ -13,6 +13,8 @@
 #define DEVICE_NAME		"SHARP MZ-2500"
 #define CONFIG_NAME		"mz2500"
 
+#define NORA_VER                "1.02"
+
 // device informations for virtual machine
 #define FRAMES_PER_SEC		55.49
 #define LINES_PER_FRAME 	448

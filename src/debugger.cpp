@@ -270,6 +270,7 @@ void* debugger_thread(void *lpx)
 	
 	uint32_t dump_addr = 0;
 	uint32_t dasm_addr = cpu->get_next_pc();
+	uint32_t dasm_eip = cpu->get_next_eip();
 	
 	p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
 	if(cpu->get_debug_regs_info(buffer, array_length(buffer))) {
@@ -280,7 +281,7 @@ void* debugger_thread(void *lpx)
 	my_printf(p->osd, _T("breaked at %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_next_pc()));
 	
 	p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
-	cpu->debug_dasm(cpu->get_next_pc(), buffer, array_length(buffer));
+	cpu->debug_dasm(cpu->get_next_pc(), cpu->get_next_eip(), buffer, array_length(buffer));
 	my_printf(p->osd, _T("next\t%s  %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_next_pc()), buffer);
 	p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
 	
@@ -408,6 +409,9 @@ void* debugger_thread(void *lpx)
 				}
 			}
 			if(_tcsicmp(params[0], _T("D")) == 0) {
+				//
+				// 'D' Dump memory
+				//
 				if(num <= 3) {
 					uint32_t start_addr = dump_addr;
 					if(num >= 2) {
@@ -460,6 +464,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("E")) == 0 || _tcsicmp(params[0], _T("EB")) == 0) {
+				//
+				// 'E' 'EB' Edit memory (Byte)
+				//
 				if(num >= 3) {
 					uint32_t addr = my_hexatoi(target, params[1]) % target->get_debug_data_addr_space();
 					for(int i = 2; i < num; i++) {
@@ -470,6 +477,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("EW")) == 0) {
+				//
+				// 'EW' Edit memory (Word)
+				//
 				if(num >= 3) {
 					uint32_t addr = my_hexatoi(target, params[1]) % target->get_debug_data_addr_space();
 					for(int i = 2; i < num; i++) {
@@ -480,6 +490,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("ED")) == 0) {
+				//
+				// 'ED' Edit memory (Double Word)
+				//
 				if(num >= 3) {
 					uint32_t addr = my_hexatoi(target, params[1]) % target->get_debug_data_addr_space();
 					for(int i = 2; i < num; i++) {
@@ -490,6 +503,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("EA")) == 0) {
+				//
+				// 'EA' Edit memory (ASCIIZ)
+				//
 				if(num >= 3) {
 					uint32_t addr = my_hexatoi(target, params[1]) % target->get_debug_data_addr_space();
 					my_tcscpy_s(buffer, array_length(buffer), prev_command);
@@ -506,42 +522,63 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("I")) == 0 || _tcsicmp(params[0], _T("IB")) == 0) {
+				//
+				// 'I' 'IB' Input from I/O port (Byte)
+				//
 				if(num == 2) {
 					my_printf(p->osd, _T("%02X\n"), target->read_debug_io8(my_hexatoi(target, params[1])) & 0xff);
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("IW")) == 0) {
+				//
+				// 'IW' Input from I/O port (Word)
+				//
 				if(num == 2) {
 					my_printf(p->osd, _T("%02X\n"), target->read_debug_io16(my_hexatoi(target, params[1])) & 0xffff);
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("ID")) == 0) {
+				//
+				// 'ID' Input from I/O port (Double Word)
+				//
 				if(num == 2) {
 					my_printf(p->osd, _T("%02X\n"), target->read_debug_io32(my_hexatoi(target, params[1])));
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("O")) == 0 || _tcsicmp(params[0], _T("OB")) == 0) {
+				//
+				// 'O' 'OB' Output to I/O port (Byte)
+				//
 				if(num == 3) {
 					target->write_debug_io8(my_hexatoi(target, params[1]), my_hexatoi(target, params[2]) & 0xff);
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("OW")) == 0) {
+				//
+				// 'OW' Output to I/O port (Word)
+				//
 				if(num == 3) {
 					target->write_debug_io16(my_hexatoi(target, params[1]), my_hexatoi(target, params[2]) & 0xffff);
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("OD")) == 0) {
+				//
+				// 'OD' Output to I/O port (Double Word)
+				//
 				if(num == 3) {
 					target->write_debug_io32(my_hexatoi(target, params[1]), my_hexatoi(target, params[2]));
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("R")) == 0) {
+				//
+				// 'R' Register dump / Register modify
+				//
 				if(num == 1) {
 					if(target->get_debug_regs_info(buffer, array_length(buffer))) {
 						my_printf(p->osd, _T("%s\n"), buffer);
@@ -554,6 +591,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("S")) == 0) {
+				//
+				// 'S' Search memory
+				//
 				if(num >= 4) {
 					uint32_t start_addr = my_hexatoi(target, params[1]) % target->get_debug_data_addr_space();
 					uint32_t end_addr = my_hexatoi(target, params[2]) % target->get_debug_data_addr_space();
@@ -577,15 +617,19 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("U")) == 0) {
+				//
+				// 'U' Disassemble
+				//
 				if(num <= 3) {
 					if(num >= 2) {
 						dasm_addr = my_hexatoi(target, params[1]) & target->get_debug_prog_addr_mask();
+						dasm_eip = dasm_addr - (cpu->get_next_pc() - cpu->get_next_eip());
 					}
 					if(num == 3) {
 						uint32_t end_addr = my_hexatoi(target, params[2]) & target->get_debug_prog_addr_mask();
 						while(dasm_addr <= end_addr) {
 							const _TCHAR *name = my_get_symbol(target, dasm_addr & target->get_debug_prog_addr_mask());
-							int len = target->debug_dasm(dasm_addr & target->get_debug_prog_addr_mask(), buffer, array_length(buffer));
+							int len = target->debug_dasm(dasm_addr & target->get_debug_prog_addr_mask(), dasm_eip, buffer, array_length(buffer));
 							if(name != NULL) {
 								my_printf(p->osd, _T("%08X                  "), dasm_addr & target->get_debug_prog_addr_mask());
 								p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_INTENSITY);
@@ -601,11 +645,12 @@ void* debugger_thread(void *lpx)
 							}
 							my_printf(p->osd, _T("  %s\n"), buffer);
 							dasm_addr += len;
+							dasm_eip += len;
 						}
 					} else {
 						for(int i = 0; i < 16; i++) {
 							const _TCHAR *name = my_get_symbol(target, dasm_addr & target->get_debug_prog_addr_mask());
-							int len = target->debug_dasm(dasm_addr & target->get_debug_prog_addr_mask(), buffer, array_length(buffer));
+							int len = target->debug_dasm(dasm_addr & target->get_debug_prog_addr_mask(), dasm_eip, buffer, array_length(buffer));
 							if(name != NULL) {
 								my_printf(p->osd, _T("%08X                  "), dasm_addr & target->get_debug_prog_addr_mask());
 								p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_INTENSITY);
@@ -621,6 +666,7 @@ void* debugger_thread(void *lpx)
 							}
 							my_printf(p->osd, _T("  %s\n"), buffer);
 							dasm_addr += len;
+							dasm_eip += len;
 						}
 					}
 					prev_command[1] = _T('\0'); // remove parameters to disassemble continuously
@@ -628,6 +674,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("UT")) == 0) {
+				//
+				// 'U' Disassemble & Trace
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else if(num <= 3) {
@@ -637,18 +686,19 @@ void* debugger_thread(void *lpx)
 					}
 					for(int i = MAX_CPU_TRACE - steps; i < MAX_CPU_TRACE; i++) {
 						int index = (target_debugger->cpu_trace_ptr + i) & (MAX_CPU_TRACE - 1);
-						if(!(target_debugger->cpu_trace[index] & ~target->get_debug_prog_addr_mask())) {
-							const _TCHAR *name = my_get_symbol(target, target_debugger->cpu_trace[index] & target->get_debug_prog_addr_mask());
-							int len = target->debug_dasm(target_debugger->cpu_trace[index] & target->get_debug_prog_addr_mask(), buffer, array_length(buffer));
+						cpu_trace_t *trace = &target_debugger->cpu_trace[index];
+						if(!(trace->pc & ~target->get_debug_prog_addr_mask())) {
+							const _TCHAR *name = my_get_symbol(target, trace->pc & target->get_debug_prog_addr_mask());
+							int len = target->debug_dasm(trace->pc & target->get_debug_prog_addr_mask(), trace->eip, trace->mode, buffer, array_length(buffer));
 							if(name != NULL) {
-								my_printf(p->osd, _T("%08X                  "), target_debugger->cpu_trace[index] & target->get_debug_prog_addr_mask());
+								my_printf(p->osd, _T("%08X                  "), trace->pc & target->get_debug_prog_addr_mask());
 								p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_INTENSITY);
 								my_printf(p->osd, _T("%s:\n"), name);
 								p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
 							}
-							my_printf(p->osd, _T("%08X  "), target_debugger->cpu_trace[index] & target->get_debug_prog_addr_mask());
+							my_printf(p->osd, _T("%08X  "), trace->pc & target->get_debug_prog_addr_mask());
 							for(int i = 0; i < len; i++) {
-								my_printf(p->osd, _T("%02X"), target->read_debug_data8((target_debugger->cpu_trace[index] + i) & target->get_debug_prog_addr_mask()));
+								my_printf(p->osd, _T("%02X"), target->read_debug_data8((trace->pc + i) & target->get_debug_prog_addr_mask()));
 							}
 							for(int i = len; i < 8; i++) {
 								my_printf(p->osd, _T("  "));
@@ -660,6 +710,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("H")) == 0) {
+				//
+				// 'H' Hexadecimal add & sub
+				//
 				if(num == 3) {
 					uint32_t l = my_hexatoi(target, params[1]);
 					uint32_t r = my_hexatoi(target, params[2]);
@@ -668,6 +721,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("N")) == 0) {
+				//
+				// 'N' Name of file
+				//
 				if(num >= 2 && params[1][0] == _T('\"')) {
 					my_tcscpy_s(buffer, array_length(buffer), prev_command);
 					if((token = my_tcstok_s(buffer, _T("\""), &context)) != NULL && (token = my_tcstok_s(NULL, _T("\""), &context)) != NULL) {
@@ -681,11 +737,17 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("L")) == 0) {
+				//
+				// 'L' Load binary/hex/symbol file
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else {
 					FILEIO* fio = new FILEIO();
 					if(check_file_extension(cpu_debugger->file_path, _T(".sym"))) {
+						//
+						// Load symbol file
+						//
 						if(fio->Fopen(cpu_debugger->file_path, FILEIO_READ_ASCII)) {
 							target_debugger->release_symbols();
 							_TCHAR line[1024];
@@ -714,6 +776,9 @@ void* debugger_thread(void *lpx)
 							my_printf(p->osd, _T("can't open %s\n"), cpu_debugger->file_path);
 						}
 					} else if(check_file_extension(cpu_debugger->file_path, _T(".hex"))) {
+						//
+						// Load hex file
+						//
 						if(fio->Fopen(cpu_debugger->file_path, FILEIO_READ_ASCII)) {
 							uint32_t start_addr = 0, linear = 0, segment = 0;
 							if(num >= 2) {
@@ -744,6 +809,9 @@ void* debugger_thread(void *lpx)
 							my_printf(p->osd, _T("can't open %s\n"), cpu_debugger->file_path);
 						}
 					} else {
+						//
+						// Load binary file
+						//
 						if(fio->Fopen(cpu_debugger->file_path, FILEIO_READ_BINARY)) {
 							uint32_t start_addr = 0x100, end_addr = (uint32_t)(target->get_debug_data_addr_space() - 1);
 							if(num >= 2) {
@@ -767,6 +835,9 @@ void* debugger_thread(void *lpx)
 					delete fio;
 				}
 			} else if(_tcsicmp(params[0], _T("W")) == 0) {
+				//
+				// 'W' Write binary/hex file
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else if(num == 3) {
@@ -807,6 +878,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("SC")) == 0) {
+				//
+				// 'SC' Clear symbol
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else if(num == 1) {
@@ -815,6 +889,9 @@ void* debugger_thread(void *lpx)
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("SL")) == 0) {
+				//
+				// 'SL' List symbol
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else if(num == 1) {
@@ -826,6 +903,9 @@ void* debugger_thread(void *lpx)
 				}
 			} else if(_tcsicmp(params[0], _T( "BP")) == 0 ||
 			          _tcsicmp(params[0], _T( "CP")) == 0) {
+				//
+				// 'BP' 'CP' Set breakpoint/checkpoint
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else {
@@ -851,6 +931,9 @@ void* debugger_thread(void *lpx)
 				}
 			} else if(_tcsicmp(params[0], _T("RBP")) == 0 || _tcsicmp(params[0], _T("WBP")) == 0 ||
 			          _tcsicmp(params[0], _T("RCP")) == 0 || _tcsicmp(params[0], _T("WCP")) == 0) {
+				//
+				// 'RBP' 'WBP' 'RCP' 'WCP' Set breakpoint/checkpoint at memory read/write
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else {
@@ -876,6 +959,9 @@ void* debugger_thread(void *lpx)
 				}
 			} else if(_tcsicmp(params[0], _T("IBP")) == 0 || _tcsicmp(params[0], _T("OBP")) == 0 ||
 			          _tcsicmp(params[0], _T("ICP")) == 0 || _tcsicmp(params[0], _T("OCP")) == 0) {
+				//
+				// 'IBP' 'OBP' 'ICP' 'OCP' Set breakpoint/checkpoint at I/O read/write
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else {
@@ -903,6 +989,9 @@ void* debugger_thread(void *lpx)
 					}
 				}
 			} else if(_tcsicmp(params[0], _T("BC")) == 0 || _tcsicmp(params[0], _T("RBC")) == 0 || _tcsicmp(params[0], _T("WBC")) == 0 || _tcsicmp(params[0], _T("IBC")) == 0 || _tcsicmp(params[0], _T("OBC")) == 0) {
+				//
+				// 'BC' 'RBC' 'WBC' 'IBC' 'OBC' Clear breakpoint/checkpoint
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else {
@@ -925,6 +1014,10 @@ void* debugger_thread(void *lpx)
 				}
 			} else if(_tcsicmp(params[0], _T("BD")) == 0 || _tcsicmp(params[0], _T("RBD")) == 0 || _tcsicmp(params[0], _T("WBD")) == 0 || _tcsicmp(params[0], _T("IBD")) == 0 || _tcsicmp(params[0], _T("OBD")) == 0 ||
 			          _tcsicmp(params[0], _T("BE")) == 0 || _tcsicmp(params[0], _T("RBE")) == 0 || _tcsicmp(params[0], _T("WBE")) == 0 || _tcsicmp(params[0], _T("IBE")) == 0 || _tcsicmp(params[0], _T("OBE")) == 0) {
+				//
+				// 'BD' 'RBD' 'WBD' 'IBD' 'OBD' Disable breakpoint/checkpoint
+				// 'BE' 'RBE' 'WBE' 'IBE' 'OBE' Enable breakpoint/checkpoint
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else {
@@ -952,6 +1045,9 @@ void* debugger_thread(void *lpx)
 					}
 				}
 			} else if(_tcsicmp(params[0], _T("BL")) == 0 || _tcsicmp(params[0], _T("RBL")) == 0 || _tcsicmp(params[0], _T("WBL")) == 0) {
+				//
+				// 'BL' 'RBL' 'WBL' List breakpoint/checkpoint
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else {
@@ -970,6 +1066,9 @@ void* debugger_thread(void *lpx)
 					}
 				}
 			} else if(_tcsicmp(params[0], _T("IBL")) == 0 || _tcsicmp(params[0], _T("OBL")) == 0) {
+				//
+				// 'IBL' 'OBL' List breakpoint/checkpoint
+				//
 				if(target_debugger == NULL) {
 					my_printf(p->osd, _T("debugger is not attached to target device %s\n"), target->this_device_name);
 				} else {
@@ -989,18 +1088,24 @@ void* debugger_thread(void *lpx)
 					}
 				}
 			} else if(_tcsicmp(params[0], _T("G")) == 0 || _tcsicmp(params[0], _T("P")) == 0) {
+				//
+				// 'G' Go
+				// 'P' Step over
+				//
 				if(num == 1 || num == 2) {
 					bool break_points_stored = false;
 					if(_tcsicmp(params[0], _T("P")) == 0) {
 						cpu_debugger->store_break_points();
-						cpu_debugger->bp.table[0].addr = (cpu->get_next_pc() + cpu->debug_dasm(cpu->get_next_pc(), buffer, array_length(buffer))) & cpu->get_debug_prog_addr_mask();
+						int len = cpu->debug_dasm(cpu->get_next_pc(), cpu->get_next_eip(), buffer, array_length(buffer));
+						cpu_debugger->bp.table[0].addr = (cpu->get_next_pc() + len) & cpu->get_debug_prog_addr_mask();
 						cpu_debugger->bp.table[0].mask = cpu->get_debug_prog_addr_mask();
 						cpu_debugger->bp.table[0].status = 1;
 						cpu_debugger->bp.table[0].check_point = false;
 						break_points_stored = true;
 					} else if(num >= 2) {
 						cpu_debugger->store_break_points();
-						cpu_debugger->bp.table[0].addr = my_hexatoi(cpu, params[1]) & cpu->get_debug_prog_addr_mask();
+						uint32_t addr = my_hexatoi(cpu, params[1]) & cpu->get_debug_prog_addr_mask();
+						cpu_debugger->bp.table[0].addr = addr;
 						cpu_debugger->bp.table[0].mask = cpu->get_debug_prog_addr_mask();
 						cpu_debugger->bp.table[0].status = 1;
 						cpu_debugger->bp.table[0].check_point = false;
@@ -1037,10 +1142,11 @@ RESTART_GO:
 					}
 					if(target == cpu) {
 						dasm_addr = cpu->get_next_pc();
+						dasm_eip = cpu->get_next_eip();
 					}
 					
 					p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
-					cpu->debug_dasm(cpu->get_pc(), buffer, array_length(buffer));
+					cpu->debug_dasm(cpu->get_pc(), cpu->get_eip(), buffer, array_length(buffer));
 					my_printf(p->osd, _T("done\t%s  %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_pc()), buffer);
 					
 					p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
@@ -1050,7 +1156,7 @@ RESTART_GO:
 					
 					if(target != cpu) {
 						p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_INTENSITY);
-						if(target->debug_dasm(target->get_next_pc(), buffer, array_length(buffer)) != 0) {
+						if(target->debug_dasm(target->get_next_pc(), target->get_next_eip(), buffer, array_length(buffer)) != 0) {
 							my_printf(p->osd, _T("next\t%s  %s\n"), my_get_value_and_symbol(target, _T("%08X"), target->get_next_pc()), buffer);
 						}
 						if(target->get_debug_regs_info(buffer, array_length(buffer))) {
@@ -1071,13 +1177,16 @@ RESTART_GO:
 						cpu_debugger->restore_break_points();
 					}
 					p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
-					cpu->debug_dasm(cpu->get_next_pc(), buffer, array_length(buffer));
+					cpu->debug_dasm(cpu->get_next_pc(), cpu->get_next_eip(), buffer, array_length(buffer));
 					my_printf(p->osd, _T("next\t%s  %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_next_pc()), buffer);
 					p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("T")) == 0) {
+				//
+				// 'T' Step
+				//
 				if(num == 1 || num == 2) {
 					int steps = 1;
 					if(num >= 2) {
@@ -1096,10 +1205,11 @@ RESTART_GO:
 						}
 						if(target == cpu) {
 							dasm_addr = cpu->get_next_pc();
+							dasm_eip = cpu->get_next_eip();
 						}
 						
 						p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
-						cpu->debug_dasm(cpu->get_pc(), buffer, array_length(buffer));
+						cpu->debug_dasm(cpu->get_pc(), cpu->get_eip(), buffer, array_length(buffer));
 						my_printf(p->osd, _T("done\t%s  %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_pc()), buffer);
 						
 						p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
@@ -1109,7 +1219,7 @@ RESTART_GO:
 						
 						if(target != cpu) {
 							p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_INTENSITY);
-							if(target->debug_dasm(target->get_next_pc(), buffer, array_length(buffer)) != 0) {
+							if(target->debug_dasm(target->get_next_pc(), target->get_next_eip(), buffer, array_length(buffer)) != 0) {
 								my_printf(p->osd, _T("next\t%s  %s\n"), my_get_value_and_symbol(target, _T("%08X"), target->get_next_pc()), buffer);
 							}
 							if(target->get_debug_regs_info(buffer, array_length(buffer))) {
@@ -1127,16 +1237,22 @@ RESTART_GO:
 						}
 					}
 					p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
-					cpu->debug_dasm(cpu->get_next_pc(), buffer, array_length(buffer));
+					cpu->debug_dasm(cpu->get_next_pc(), cpu->get_next_eip(), buffer, array_length(buffer));
 					my_printf(p->osd, _T("next\t%s  %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_next_pc()), buffer);
 					p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("Q")) == 0) {
+				//
+				// 'Q' Quit deugger
+				//
 				p->osd->close_debugger_console();
 				break;
 			} else if(_tcsicmp(params[0], _T(">")) == 0) {
+				//
+				// '>' Output logfile
+				//
 				if(num == 2) {
 					if(logfile != NULL) {
 						if(logfile->IsOpened()) {
@@ -1151,6 +1267,9 @@ RESTART_GO:
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
 			} else if(_tcsicmp(params[0], _T("<")) == 0) {
+				//
+				// '<' Input commands from file
+				//
 				if(num == 2) {
 					if(cmdfile != NULL) {
 						if(cmdfile->IsOpened()) {
@@ -1167,7 +1286,22 @@ RESTART_GO:
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
-			} else if(_tcsicmp(params[0], _T("!")) == 0) {
+			} else if(_tcsicmp(params[0], _T("!!")) == 0) {
+				//
+				// "!!" Do nothing
+				//
+			} else if(params[0] != NULL && params[0][0] == '!') {
+				//
+				// "!" Extend commands
+				//
+				if(_tcsicmp(params[0], _T("!")) != 0) {
+					for (int i=31; i>0; i--) {
+						params[i] = params[i-1];
+					}
+					params[0] = _T("!");
+					params[1] = &params[1][1];
+					num++;
+                                }
 				if(num == 1) {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				} else if(_tcsicmp(params[1], _T("RESET")) == 0) {
@@ -1240,6 +1374,7 @@ RESTART_GO:
 								}
 								dump_addr = 0;
 								dasm_addr = target->get_next_pc();
+								dasm_eip = target->get_next_eip();
 							}
 						} else {
 							my_printf(p->osd, _T("device not found\n"));
@@ -1298,6 +1433,7 @@ RESTART_GO:
 								}
 								dump_addr = 0;
 								dasm_addr = cpu->get_next_pc();
+								dasm_eip = cpu->get_next_eip();
 								
 								p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
 								if(cpu->get_debug_regs_info(buffer, array_length(buffer))) {
@@ -1308,7 +1444,7 @@ RESTART_GO:
 								my_printf(p->osd, _T("breaked at %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_next_pc()));
 								
 								p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
-								cpu->debug_dasm(cpu->get_next_pc(), buffer, array_length(buffer));
+								cpu->debug_dasm(cpu->get_next_pc(), cpu->get_next_eip(), buffer, array_length(buffer));
 								my_printf(p->osd, _T("next\t%s  %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_next_pc()), buffer);
 								p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
 							}
@@ -1366,11 +1502,12 @@ RESTART_GO:
 							}
 							if(target == cpu) {
 								dasm_addr = cpu->get_next_pc();
+								dasm_eip = cpu->get_next_eip();
 							}
 							cpu_debugger->restore_break_points();
 							
 							p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
-							cpu->debug_dasm(cpu->get_pc(), buffer, array_length(buffer));
+							cpu->debug_dasm(cpu->get_pc(), cpu->get_eip(), buffer, array_length(buffer));
 							my_printf(p->osd, _T("done\t%s  %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_pc()), buffer);
 							
 							p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
@@ -1380,7 +1517,7 @@ RESTART_GO:
 							
 							if(target != cpu) {
 								p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_INTENSITY);
-								if(target->debug_dasm(target->get_next_pc(), buffer, array_length(buffer)) != 0) {
+								if(target->debug_dasm(target->get_next_pc(), target->get_next_eip(), buffer, array_length(buffer)) != 0) {
 									my_printf(p->osd, _T("next\t%s  %s\n"), my_get_value_and_symbol(target, _T("%08X"), target->get_next_pc()), buffer);
 								}
 								if(target->get_debug_regs_info(buffer, array_length(buffer))) {
@@ -1391,7 +1528,7 @@ RESTART_GO:
 							p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_INTENSITY);
 							my_printf(p->osd, _T("breaked at %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_next_pc()));
 							p->osd->set_console_text_attribute(OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
-							cpu->debug_dasm(cpu->get_next_pc(), buffer, array_length(buffer));
+							cpu->debug_dasm(cpu->get_next_pc(), cpu->get_next_eip(), buffer, array_length(buffer));
 							my_printf(p->osd, _T("next\t%s  %s\n"), my_get_value_and_symbol(cpu, _T("%08X"), cpu->get_next_pc()), buffer);
 							p->osd->set_console_text_attribute(OSD_CONSOLE_RED | OSD_CONSOLE_GREEN | OSD_CONSOLE_BLUE | OSD_CONSOLE_INTENSITY);
 						} else {
@@ -1471,8 +1608,6 @@ RESTART_GO:
 				} else {
 					my_printf(p->osd, _T("unknown command ! %s\n"), params[1]);
 				}
-			} else if(_tcsicmp(params[0], _T("!!")) == 0) {
-				// do nothing
 			} else if(_tcsicmp(params[0], _T("?")) == 0) {
 				my_printf(p->osd, _T("D [<range>] - dump memory\n"));
 				my_printf(p->osd, _T("E[{B,W,D}] <address> <list> - edit memory (byte,word,dword)\n"));

@@ -15,6 +15,8 @@
 #ifndef _PC8801_H_
 #define _PC8801_H_
 
+#define NORA_VER                "1.00"
+
 #if defined(_PC8801MA)
 #define DEVICE_NAME		"NEC PC-8801MA"
 #define CONFIG_NAME		"pc8801ma"
