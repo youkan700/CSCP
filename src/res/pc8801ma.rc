@@ -70,6 +70,7 @@ BEGIN
     VK_RETURN,      ID_ACCEL_SCREEN,        VIRTKEY, ALT, NOINVERT
     VK_APPS,        ID_ACCEL_SPEED,         VIRTKEY, NOINVERT
     VK_APPS,        ID_ACCEL_ROMAJI,        VIRTKEY, CONTROL, NOINVERT
+    VK_F12,         ID_RESET,               VIRTKEY, NOINVERT
 END
 
 
@@ -82,7 +83,7 @@ IDR_MENU1 MENU DISCARDABLE
 BEGIN
     POPUP "Control"
     BEGIN
-        MENUITEM "Reset",                       ID_RESET
+        MENUITEM "Reset\aF12",                  ID_RESET
         MENUITEM SEPARATOR
         MENUITEM "CPU x1",                      ID_CPU_POWER0
         MENUITEM "CPU x2",                      ID_CPU_POWER1
@@ -324,6 +325,7 @@ BEGIN
             MENUITEM "Joystick #1",                 ID_INPUT_JOYSTICK0
             MENUITEM "Joystick #2",                 ID_INPUT_JOYSTICK1
             MENUITEM "Joystick To Keyboard",        ID_INPUT_JOYTOKEY
+            MENUITEM "Cursor To 10-Key",            ID_INPUT_CURSORTO10KEY
         END
         MENUITEM SEPARATOR
         MENUITEM "Use Direct2D1",               ID_HOST_USE_D2D1
@@ -332,6 +334,8 @@ BEGIN
         MENUITEM "Use DirectInput",             ID_HOST_USE_DINPUT
         MENUITEM "Disable Windows 8 DWM",       ID_HOST_DISABLE_DWM
         MENUITEM "Show Status Bar",             ID_HOST_SHOW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "About...",                    ID_HOST_ABOUT
     END
 END
 
