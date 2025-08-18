@@ -13,6 +13,7 @@
 #include "../vm.h"
 #include "../../emu.h"
 #include "../device.h"
+#include "crtc.h"
 
 #define SIG_MEMORY_HBLANK_TEXT	0
 #define SIG_MEMORY_VBLANK_TEXT	1
@@ -23,7 +24,8 @@
 class MEMORY : public DEVICE
 {
 private:
-	DEVICE *d_cpu, *d_crtc;
+	DEVICE *d_cpu;
+	CRTC *d_crtc;
 	
 	uint8_t* rbank[32];
 	uint8_t* wbank[32];
@@ -83,9 +85,9 @@ public:
 	{
 		d_cpu = device;
 	}
-	void set_context_crtc(DEVICE* device)
+	void set_context_crtc(CRTC* crtc)
 	{
-		d_crtc = device;
+		d_crtc = crtc;
 	}
 	uint8_t* get_vram()
 	{
@@ -103,6 +105,7 @@ public:
 	{
 		return pcg;
 	}
+	void refresh_map();
 };
 
 #endif
