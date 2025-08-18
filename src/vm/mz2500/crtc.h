@@ -13,6 +13,7 @@
 #include "../vm.h"
 #include "../../emu.h"
 #include "../device.h"
+#include "memory.h"
 
 #define SIG_CRTC_COLUMN_SIZE	0
 #define SIG_CRTC_PALLETE	1
@@ -22,7 +23,8 @@
 class CRTC : public DEVICE
 {
 private:
-	DEVICE *d_mem, *d_int, *d_pio;
+	DEVICE *d_int, *d_pio;
+	MEMORY *d_mem;
 	
 	// config
 	bool scan_line, scan_tmp;
@@ -141,9 +143,9 @@ public:
 	bool process_state(FILEIO* state_fio, bool loading);
 	
 	// unique function
-	void set_context_mem(DEVICE* device)
+	void set_context_mem(MEMORY* memory)
 	{
-		d_mem = device;
+		d_mem = memory;
 	}
 	void set_context_int(DEVICE* device)
 	{
@@ -179,6 +181,7 @@ public:
 		pcg3 = ptr + 0x1800;
 	}
 	void draw_screen();
+	bool is_4color_mode();
 };
 
 #endif
