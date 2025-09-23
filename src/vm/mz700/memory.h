@@ -151,6 +151,9 @@ public:
 #if defined(_MZ800)
 	uint32_t read_io8(uint32_t addr);
 #endif
+#ifdef USE_DEBUGGER
+	uint32_t read_debug_data8(uint32_t addr);
+#endif
 	bool process_state(FILEIO* state_fio, bool loading);
 	
 	// unique functions
