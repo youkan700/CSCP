@@ -2522,14 +2522,12 @@ void Z80::check_interrupt()
 #ifdef USE_DEBUGGER
 void Z80::write_debug_data8(uint32_t addr, uint32_t data)
 {
-	int wait_tmp;
-	d_mem_stored->write_data8w(addr, data, &wait_tmp);
+	d_mem_stored->write_debug_data8(addr, data);
 }
 
 uint32_t Z80::read_debug_data8(uint32_t addr)
 {
-	int wait_tmp;
-	return d_mem_stored->read_data8w(addr, &wait_tmp);
+	return d_mem_stored->read_debug_data8(addr);
 }
 
 void Z80::write_debug_io8(uint32_t addr, uint32_t data)
@@ -2628,7 +2626,6 @@ F'= [--------]  A'= 00  BC'= 0000  DE'= 0000  HL'= 0000  SP = 0000  PC = 0000
         I = 00  R = 00 (BC)= 0000 (DE)= 0000 (HL)= 0000 (SP)= 0000  EI:IFF2=0
 Clocks = 0 (0) Since Scanline = 0/0 (0/0)
 */
-	int wait_tmp;
 	my_stprintf_s(buffer, buffer_len,
 	_T("F = [%c%c%c%c%c%c%c%c]  A = %02X  BC = %04X  DE = %04X  HL = %04X  IX = %04X  IY = %04X\n")
 	_T("F'= [%c%c%c%c%c%c%c%c]  A'= %02X  BC'= %04X  DE'= %04X  HL'= %04X  SP = %04X  PC = %04X\n")
@@ -2641,7 +2638,7 @@ Clocks = 0 (0) Since Scanline = 0/0 (0/0)
 	(F2 & HF) ? _T('H') : _T('-'), (F2 & YF) ? _T('Y') : _T('-'), (F2 & ZF) ? _T('Z') : _T('-'), (F2 & SF) ? _T('S') : _T('-'),
 	A2, BC2, DE2, HL2, SP, PC,
 	I, R,
-	d_mem_stored->read_data16w(BC, &wait_tmp), d_mem_stored->read_data16w(DE, &wait_tmp), d_mem_stored->read_data16w(HL, &wait_tmp), d_mem_stored->read_data16w(SP, &wait_tmp),
+	d_mem_stored->read_debug_data16(BC), d_mem_stored->read_debug_data16(DE), d_mem_stored->read_debug_data16(HL), d_mem_stored->read_debug_data16(SP),
 	iff1 ? _T('E') : _T('D'), iff2,
 	total_icount, total_icount - prev_total_icount,
 	get_passed_clock_since_vline(), get_cur_vline_clocks(), get_cur_vline(), get_lines_per_frame());

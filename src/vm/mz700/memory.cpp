@@ -664,6 +664,28 @@ uint32_t MEMORY::read_data8w(uint32_t addr, int* wait)
 	return read_data8(addr);
 }
 
+#ifdef USE_DEBUGGER
+uint32_t MEMORY::read_debug_data8(uint32_t addr)
+{
+	uint32_t val;
+	bool sav_blank_vram = blank_vram;
+#if defined(_MZ800) || defined(_MZ1500)
+	bool sav_blank_pcg = blank_pcg;
+#endif
+	blank_vram = true;
+#if defined(_MZ800) || defined(_MZ1500)
+	blank_pcg = true;
+#endif
+	val = read_data8(addr);
+
+	blank_vram = sav_blank_vram;
+#if defined(_MZ800) || defined(_MZ1500)
+	blank_pcg = sav_blank_pcg;
+#endif
+	return val;
+}
+#endif //USE_DEBUGGER
+
 void MEMORY::write_io8(uint32_t addr, uint32_t data)
 {
 	switch(addr & 0xff) {
@@ -904,7 +926,6 @@ void MEMORY::update_map_high()
 	} else {
 		if(mem_bank & MEM_BANK_MON_H) {
 			SET_BANK(0xd000, 0xdfff, vram, vram);
-			SET_BANK(0xe000, 0xe7ff, wdmy, rdmy);
 			SET_BANK(0xe000, 0xffff, wdmy, ext );
 		} else {
 			SET_BANK(0xd000, 0xffff, ram + 0xd000, ram + 0xd000);
