@@ -1,3 +1,15 @@
+9/23/2025
+
+[VM/I86] Update MAME i86 core for DIV/IDIV/NEG instructions
+[VM/I386] Update MAME i386 core to version 0.279
+[VM/I386_NP21] update to Neko Project 21/W ver0.86 rev95 beta7
+
+[SCV/MEMORY] support Pole Position II (thanks MiSTer)
+[SCV/MEMORY] improve memory wait cycles (thanks MiSTer)
+[SCV/VDP] improve VDP timing (thanks MiSTer)
+[SCV/VDP] support RGB palette (thanks MiSTer)
+
+
 4/28/2025
 
 IMPORTANT: The license is changed from "GPL v2" to "GPL v2 or Later"
