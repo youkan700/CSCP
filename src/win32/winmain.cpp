@@ -967,7 +967,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 				   "Common Source Code Project\n"
 				   _T(DEVICE_NAME) " Emulator\n"
 				   "\t\tby TAKEDA, Toshiya\n\n"
-				   "Based on version 2024/01/01\n\n"
+				   "Based on version 2025/09/23\n\n"
 				   "Patched by youkan"
 #ifdef NORA_VER
 				   "\tVer." NORA_VER
