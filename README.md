@@ -1,5 +1,5 @@
 # Common Source Code Project Emulator 野良ビルド
-武田さんのCommon Source Code Project (http://takeda-toshiya.my.coocan.jp/) にいくつかのパッチを当てた野良ビルドです。
+武田さんのCommon Source Code Project (https://takeda-toshiya.my.coocan.jp/) にいくつかのパッチを当てた野良ビルドです。
 
 ### 共通
 - Hostメニューに "About..." を追加。バージョン確認用
