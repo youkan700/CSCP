@@ -8,6 +8,7 @@
 */
 
 #include "memory.h"
+#include "crtc.h"
 
 #define PAGE_TYPE_NORMAL	0
 #define PAGE_TYPE_TVRAM		1
@@ -383,19 +384,19 @@ void MEMORY::set_map(uint8_t bank, uint8_t data)
 		page_type_tmp = PAGE_TYPE_NORMAL;
 	} else if(0x20 <= data && data <= 0x2f) {
 		// vram                            B0          R0          G0          I0          B1          R1          G1          I1
-		static const int ofs_table[]    = {0x00, 0x01, 0x04, 0x05, 0x08, 0x09, 0x0c, 0x0d, 0x02, 0x03, 0x06, 0x07, 0x0a, 0x0b, 0x0e, 0x0f};
+		static const int ofs_table[] = {0x00, 0x01, 0x04, 0x05, 0x08, 0x09, 0x0c, 0x0d, 0x02, 0x03, 0x06, 0x07, 0x0a, 0x0b, 0x0e, 0x0f};
 		static const int ofs_table_4c[] = {0x00, 0x01, 0x04, 0x05, -1,   -1,   -1,   -1,   0x08, 0x09, 0x0c, 0x0d, -1,   -1,   -1,   -1  };
-                if (d_crtc->is_4color_mode()) {
-			if (ofs_table_4c[data - 0x20] < 0) {
+		if(d_crtc->is_4color_mode()) {
+			if(ofs_table_4c[data - 0x20] < 0) {
 				SET_BANK(base,  base + 0x1fff, wdmy, rdmy);
 			} else {
 				int ofs = ofs_table_4c[data - 0x20] * 0x2000;
 				SET_BANK(base,  base + 0x1fff, vram + ofs, vram + ofs);
 			}
-                } else {
+		} else {
 			int ofs = ofs_table[data - 0x20] * 0x2000;
 			SET_BANK(base,  base + 0x1fff, vram + ofs, vram + ofs);
-                }
+		}
 		page_type_tmp = PAGE_TYPE_GVRAM;
 		page_wait_tmp = is_4mhz ? 0 : 1;
 	} else if(0x30 <= data && data <= 0x33) {
@@ -441,7 +442,7 @@ void MEMORY::set_map(uint8_t bank, uint8_t data)
 
 void MEMORY::refresh_map()
 {
-	for (int i=0; i<8; i++) {
+	for(int i = 0; i < 8; i++) {
 		set_map(i, page[i]);
 	}
 }

@@ -13,13 +13,14 @@
 #include "../vm.h"
 #include "../../emu.h"
 #include "../device.h"
-#include "crtc.h"
 
 #define SIG_MEMORY_HBLANK_TEXT	0
 #define SIG_MEMORY_VBLANK_TEXT	1
 #define SIG_MEMORY_HBLANK_GRAPH	2
 #define SIG_MEMORY_VBLANK_GRAPH	3
 #define SIG_MEMORY_VRAM_SEL	4
+
+class CRTC;
 
 class MEMORY : public DEVICE
 {
@@ -88,9 +89,9 @@ public:
 	{
 		d_cpu = device;
 	}
-	void set_context_crtc(CRTC* crtc)
+	void set_context_crtc(CRTC* device)
 	{
-		d_crtc = crtc;
+		d_crtc = device;
 	}
 	uint8_t* get_vram()
 	{

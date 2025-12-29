@@ -247,7 +247,7 @@ void I8253::input_clock(int ch, int clock)
 	if(counter[ch].delay > 0) {
 		counter[ch].delay--;
 		clock -= 1;
-		if (counter[ch].delay == 0) {
+		if(counter[ch].delay == 0) {
 			counter[ch].count = COUNT_VALUE(ch);
 //#ifdef HAS_I8254
 			counter[ch].null_count = false;
@@ -276,7 +276,7 @@ loop:
 		}
 	}
 	if(counter[ch].count <= 0) {
-		if(/*TEST counter[ch].mode == 0 ||*/ counter[ch].mode == 2 || counter[ch].mode == 3) {
+		if(/*counter[ch].mode == 0 ||*/ counter[ch].mode == 2 || counter[ch].mode == 3) {
 			counter[ch].count += tmp;
 //#ifdef HAS_I8254
 			counter[ch].null_count = false;
@@ -417,7 +417,7 @@ int I8253::get_next_count(int ch)
 	return counter[ch].count;
 }
 
-#define STATE_VERSION	2
+#define STATE_VERSION	3
 
 bool I8253::process_state(FILEIO* state_fio, bool loading)
 {

@@ -152,9 +152,9 @@ void EVENT::drive()
 				cpu_clocks_in_op = 0;
 				cpu_clocks_done_tmp  = d_cpu[0].device->run(-1);
 				cpu_clocks_done_tmp -= cpu_clocks_in_op;
-				#ifdef _DEBUG
-					assert(cpu_clocks_done_tmp >= 0);
-				#endif
+//				#ifdef _DEBUG
+//					assert(cpu_clocks_done_tmp >= 0);
+//				#endif
 				if(cpu_clocks_done_tmp < 0) cpu_clocks_done_tmp = 0;
 			} else {
 				// sync to sub cpus
