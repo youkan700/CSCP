@@ -1,8 +1,8 @@
 /*
 	SHARP MZ-2500 Emulator 'EmuZ-2500'
 
-	Author : Takeda.Toshiya
-	Date   : 2004.09.10 -
+	Author : youkan700
+	Date   : 2024.04.30 -
 
 	[ MZ-1E32 (Parallel I/F board: Emulate Kanji ROM part only) ]
 */

@@ -1,8 +1,8 @@
 /*
 	SHARP MZ-2500 Emulator 'EmuZ-2500'
 
-	Author : Takeda.Toshiya
-	Date   : 2004.09.10 -
+	Author : youkan700
+	Date   : 2024.04.30 -
 
 	[ MZ-1E32 (Parallel I/F board: Emulate Kanji ROM part only) ]
 */
@@ -13,7 +13,8 @@ void MZ1E32::initialize()
 {
 	// rom file
 	FILEIO* fio = new FILEIO();
-	if(fio->Fopen(create_local_path(_T("MZ-1E32.ROM")), FILEIO_READ_BINARY)) {
+	if(fio->Fopen(create_local_path(_T("MZ1E32.ROM" )), FILEIO_READ_BINARY) ||
+	   fio->Fopen(create_local_path(_T("MZ-1E32.ROM")), FILEIO_READ_BINARY)) {
 		fio->Fseek(0, FILEIO_SEEK_END);
 		if((rom_size = fio->Ftell()) == 0xA0000) {
 			rom_buffer = (uint8_t*)malloc(rom_size);

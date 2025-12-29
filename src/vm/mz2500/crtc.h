@@ -13,12 +13,13 @@
 #include "../vm.h"
 #include "../../emu.h"
 #include "../device.h"
-#include "memory.h"
 
 #define SIG_CRTC_COLUMN_SIZE	0
 #define SIG_CRTC_PALLETE	1
 #define SIG_CRTC_REVERSE	2
 #define SIG_CRTC_MASK		3
+
+class MEMORY;
 
 class CRTC : public DEVICE
 {
@@ -143,9 +144,9 @@ public:
 	bool process_state(FILEIO* state_fio, bool loading);
 	
 	// unique function
-	void set_context_mem(MEMORY* memory)
+	void set_context_mem(MEMORY* device)
 	{
-		d_mem = memory;
+		d_mem = device;
 	}
 	void set_context_int(DEVICE* device)
 	{

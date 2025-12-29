@@ -428,7 +428,9 @@ void CRTC::write_io8(uint32_t addr, uint32_t data)
 				break;
 			}
 			// check for entering/leaving 4-color mode
-			if ((prev & 0x10) != (data & 0x10)) d_mem->refresh_map();
+			if((prev & 0x10) != (data & 0x10)) {
+				d_mem->refresh_map();
+			}
 			break;
 		// scroll
 		case 0x0f:
@@ -1041,11 +1043,13 @@ void CRTC::draw_80column_screen()
 	// if in 256 color mode but 40-column function is not set as 64 color mode,
 	// convert its color as the bottom plane is forced to 0.
 	//
-	if ((textreg[0] & 0x01) == 0x00) {
+	if((textreg[0] & 0x01) == 0x00) {
 		for(int y = line; y < 400; y++) {
 			uint8_t* tdest = &text[y * 640];
 			for(int x = 0; x < 640; x++) {
-			        if (!(tdest[x] & 8)) tdest[x] = ((tdest[x] & 7) << 3) + 16;
+				if(!(tdest[x] & 8)) {
+					tdest[x] = ((tdest[x] & 7) << 3) + 16;
+				}
 			}
 		}
 	}
@@ -1141,11 +1145,13 @@ void CRTC::draw_40column_screen()
 	// if in 256 color mode but 40-column function is not set as 64 color mode,
 	// convert its color as the bottom plane is forced to 0.
 	//
-	if ((textreg[0] & 0x0c) != 0x00 && (textreg[0] & 0x01) == 0x00) {
+	if((textreg[0] & 0x0c) != 0x00 && (textreg[0] & 0x01) == 0x00) {
 		for(int y = line; y < 400; y++) {
 			uint8_t* tdest = &text[y * 640];
 			for(int x = 0; x < 640; x++) {
-			        if (!(tdest[x] & 8)) tdest[x] = ((tdest[x] & 7) << 3) + 16;
+				if(!(tdest[x] & 8)) {
+					tdest[x] = ((tdest[x] & 7) << 3) + 16;
+				}
 			}
 		}
 	}
@@ -1767,7 +1773,7 @@ void CRTC::draw_640x400x4screen()
 {
 	uint8_t B, R;
 	uint32_t dest = 0;
-
+	
 	if(map_init) {
 		create_addr_map(80, 400);
 	}
@@ -1831,7 +1837,9 @@ void CRTC::create_addr_map(int xmax, int ymax)
 	uint16_t SAD2 = cgreg[0x14] | ((cgreg[0x15] & 0x7f) << 8);
 	uint16_t SLN1 = cgreg[0x16] | ((cgreg[0x17] & 0x01) << 8);
 	
-	if ((cgreg[0x0e] & 0x02) == 0) HDSC <<= 1;
+	if((cgreg[0x0e] & 0x02) == 0) {
+		HDSC <<= 1;
+	}
 	for(int y = 0; y < SLN1 && y < ymax; y++) {
 		for(int x = 0; x < xmax; x++) {
 			map_hdsc[y][x] = HDSC;
