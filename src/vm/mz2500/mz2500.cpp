@@ -114,9 +114,9 @@ VM::VM(EMU* parent_emu) : VM_TEMPLATE(parent_emu)
 		cmu800 = new CMU800(this, emu);
 		cmu800->set_context_midi(new MIDI(this, emu));
 	}
-	if(config.option_switch & OPTION_SWITCH_MZ1E26) {
+//	if(config.option_switch & OPTION_SWITCH_MZ1E26) {
 		mz1e26 = new MZ1E26(this, emu);
-	}
+//	}
 	if(config.option_switch & OPTION_SWITCH_MZ1E30) {
 		sasi_host = new SCSI_HOST(this, emu);
 		sasi_hdd = new SASI_HDD(this, emu);
@@ -266,9 +266,9 @@ VM::VM(EMU* parent_emu) : VM_TEMPLATE(parent_emu)
 	io->set_iomap_range_rw(0xbc, 0xbf, crtc);
 	io->set_iomap_range_w(0xc6, 0xc7, interrupt);
 	io->set_iomap_range_rw(0xc8, 0xc9, opn);
-	if(config.option_switch & OPTION_SWITCH_MZ1E26) {
+//	if(config.option_switch & OPTION_SWITCH_MZ1E26) {
 		io->set_iomap_single_rw(0xca, mz1e26);
-	}
+//	}
 	io->set_iomap_single_rw(0xcc, calendar);
 	io->set_iomap_single_w(0xcd, serial);
 	io->set_iomap_range_w(0xce, 0xcf, memory);
