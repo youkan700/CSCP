@@ -227,6 +227,23 @@ uint32_t MEMORY::read_debug_data8(uint32_t addr)
 	vblank_g = sav_vblank_g;
 	return val;
 }
+void MEMORY::write_debug_data8(uint32_t addr, uint32_t data)
+{
+	bool sav_hblank_t = hblank_t;
+	bool sav_vblank_t = vblank_t;
+	bool sav_hblank_g = hblank_g;
+	bool sav_vblank_g = vblank_g;
+
+	hblank_t = vblank_t = true;
+	hblank_g = vblank_g = true;
+
+	write_data8(addr, data);
+
+	hblank_t = sav_hblank_t;
+	vblank_t = sav_vblank_t;
+	hblank_g = sav_hblank_g;
+	vblank_g = sav_vblank_g;
+}
 #endif //USE_DEBUGGER
 
 uint32_t MEMORY::fetch_op(uint32_t addr, int* wait)

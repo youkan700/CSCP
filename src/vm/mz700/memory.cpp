@@ -726,6 +726,23 @@ uint32_t MEMORY::read_debug_data8(uint32_t addr)
 #endif
 	return val;
 }
+void MEMORY::write_debug_data8(uint32_t addr, uint32_t data)
+{
+	bool sav_blank_vram = blank_vram;
+#if defined(_MZ800) || defined(_MZ1500)
+	bool sav_blank_pcg = blank_pcg;
+#endif
+	blank_vram = true;
+#if defined(_MZ800) || defined(_MZ1500)
+	blank_pcg = true;
+#endif
+	write_data8(addr, data);
+	
+	blank_vram = sav_blank_vram;
+#if defined(_MZ800) || defined(_MZ1500)
+	blank_pcg = sav_blank_pcg;
+#endif
+}
 #endif //USE_DEBUGGER
 
 void MEMORY::write_io8(uint32_t addr, uint32_t data)

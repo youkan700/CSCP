@@ -80,6 +80,7 @@ public:
 	uint32_t read_io8(uint32_t addr);
 #ifdef USE_DEBUGGER
 	uint32_t read_debug_data8(uint32_t addr);
+	void write_debug_data8(uint32_t addr, uint32_t data);
 #endif
 	void write_signal(int id, uint32_t data, uint32_t mask);
 	bool process_state(FILEIO* state_fio, bool loading);

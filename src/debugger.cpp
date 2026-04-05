@@ -525,6 +525,22 @@ void* debugger_thread(void *lpx)
 				} else {
 					my_printf(p->osd, _T("invalid parameter number\n"));
 				}
+			} else if(_tcsicmp(params[0], _T("F")) == 0) {
+				//
+				// 'F' Fill memory
+				//
+				if(num == 4) {
+					uint32_t start_addr = my_hexatoi(target, params[1]) % target->get_debug_data_addr_space(), end_addr = my_hexatoi(target, params[2]) % target->get_debug_data_addr_space(), val = my_hexatoi(target, params[3]) & 0xff;
+					uint32_t addr;
+					if (start_addr > end_addr) {
+						my_printf(p->osd, _T("invalid range\n"));
+					} else
+					for(addr = start_addr; addr <= end_addr; addr++) {
+						target->write_debug_data8(addr % target->get_debug_data_addr_space(), val);
+					}
+				} else {
+					my_printf(p->osd, _T("invalid parameter number\n"));
+				}
 			} else if(_tcsicmp(params[0], _T("I")) == 0 || _tcsicmp(params[0], _T("IB")) == 0) {
 				//
 				// 'I' 'IB' Input from I/O port (Byte)
@@ -1617,6 +1633,7 @@ RESTART_GO:
 				my_printf(p->osd, _T("DI [<range>] - dump memory with inverted bits\n"));
 				my_printf(p->osd, _T("E[{B,W,D}] <address> <list> - edit memory (byte,word,dword)\n"));
 				my_printf(p->osd, _T("EA <address> \"<value>\" - edit memory (ascii)\n"));
+				my_printf(p->osd, _T("F <range> <value> - fill memory\n"));
 				my_printf(p->osd, _T("I[{B,W,D}] <port> - input port (byte,word,dword)\n"));
 				my_printf(p->osd, _T("O[{B,W,D}] <port> <value> - output port (byte,word,dword)\n"));
 				my_printf(p->osd, _T("R - show register(s)\n"));

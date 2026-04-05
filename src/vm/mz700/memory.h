@@ -172,6 +172,7 @@ public:
 #endif
 #ifdef USE_DEBUGGER
 	uint32_t read_debug_data8(uint32_t addr);
+	void write_debug_data8(uint32_t addr, uint32_t data);
 #endif
 	bool process_state(FILEIO* state_fio, bool loading);
 	
