@@ -52,7 +52,12 @@ void MZ1P17::initialize()
 	}
 	space_left = (width - PIXEL_PER_INCH * 8) / 2;
 	space_top = (height - PIXEL_PER_INCH * 11) / 2;
-	
+
+	memset(&bitmap_paper, 0, sizeof(bitmap_t));
+	for (int i = 0; i < 4; i++) {
+		memset(&bitmap_line[i], 0, sizeof(bitmap_t));
+	}
+
 	emu->create_bitmap(&bitmap_paper, width, height);
 	emu->create_bitmap(&bitmap_line[0], PIXEL_PER_INCH * 8, (48 + 2) * DOT_SCALE);	// black
 	emu->create_bitmap(&bitmap_line[1], PIXEL_PER_INCH * 8, (48 + 2) * DOT_SCALE);	// cyan
