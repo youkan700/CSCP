@@ -1595,10 +1595,12 @@ void CRTC::draw_cg()
 		draw_640x400x4screen();
 		break;
 	case 0x14:
+	case 0x94:
 		draw_320x200x16screen(0);
 		draw_320x200x16screen(1);
 		break;
 	case 0x15:
+	case 0x95:
 		draw_320x200x16screen(1);
 		draw_320x200x16screen(0);
 		break;
@@ -1607,25 +1609,27 @@ void CRTC::draw_cg()
 		break;
 	case 0x1d:
 	case 0x9d:
-		draw_320x200x256screen(200);
+		draw_320x200x256screen();
 		break;
 	case 0x93:
 		draw_640x400x16screen();
-		break;
-	case 0x94:
-		draw_320x200x16screen(2);
-		draw_320x200x16screen(3);
-		break;
-	case 0x95:
-		draw_320x200x16screen(3);
-		draw_320x200x16screen(2);
 		break;
 	case 0x97:
 		draw_640x200x16screen(1);
 		break;
 	case 0x19:
 	case 0x99:
-		draw_320x200x256screen(400);
+		draw_320x200x256screen();
+		break;
+	case 0x10:
+	case 0x90:
+		draw_320x200x16screen(0);
+		draw_320x200x16screen(1);
+		break;
+	case 0x11:
+	case 0x91:
+		draw_320x200x16screen(1);
+		draw_320x200x16screen(0);
 		break;
 	}
 	
@@ -1640,19 +1644,31 @@ void CRTC::draw_cg()
 void CRTC::draw_320x200x16screen(uint8_t pl)
 {
 	uint8_t B, R, G, I, col;
-	uint32_t dest = 0;
+	uint32_t dest = 0, to_nextline;
+	uint32_t dest2;
 	uint16_t ex;
 	uint16_t subplane;
-	
+	int hscrl, ymax;
+
+	ymax = ((cgreg[0x0e] & 0x04) != 0) ? 200 : 400;
 	if(map_init) {
-		create_addr_map(40, 200);
+		create_addr_map(40, ymax);
 	}
+	to_nextline = (ymax == 200) ? 640 : 0;
 	ex = (cgreg[0x0e] & 0x80) << 7;
 	subplane = (pl & 1) ? 0x2000 : 0x0000;
-	for(int y = 0; y < 200; y++) {
+	for(int y = 0; y < ymax; y++) {
+		if ((pl & 1) == 0) {
+			hscrl = map_hdsc[y][0];
+			for(int i = 0; i < hscrl; i++) {
+				cg[dest+i] = 15;
+			}
+		} else {
+			hscrl = 0;
+		}
 		for(int x = 0; x < 40; x++) {
 			uint16_t src = (map_addr[y][x] ^ subplane) | ex;
-			uint32_t dest2 = dest + map_hdsc[y][x];
+			dest2 = dest + hscrl;
 			dest += 16;
 			
 			if(pl == 0 || pl == 2) {
@@ -1676,16 +1692,22 @@ void CRTC::draw_320x200x16screen(uint8_t pl)
 			col = cg_matrix0[B][R][6] | cg_matrix1[G][I][6]; if(col) cg[dest2 + 12] = cg[dest2 + 13] = col;
 			col = cg_matrix0[B][R][7] | cg_matrix1[G][I][7]; if(col) cg[dest2 + 14] = cg[dest2 + 15] = col;
 		}
-		dest += 640;
+		dest2 = dest;
+		for(int i = 0; i < hscrl; i++) {
+			cg[dest2++] = 0;
+		}
+		dest += to_nextline;
 	}
 }
 
-void CRTC::draw_320x200x256screen(int ymax)
+void CRTC::draw_320x200x256screen()
 {
 	uint8_t B0, B1, R0, R1, G0, G1, I0, I1;
 	uint32_t dest = 0, to_nextline;
 	uint16_t ex;
+	int ymax;
 	
+	ymax = ((cgreg[0x0e] & 0x04) != 0) ? 200 : 400;
 	if(map_init) {
 		create_addr_map(40, ymax);
 	}
@@ -1705,6 +1727,10 @@ void CRTC::draw_320x200x256screen(int ymax)
 	to_nextline = (ymax == 200) ? 640 : 0;
 	ex = (cgreg[0x0e] & 0x80) << 7;
 	for(int y = 0; y < ymax; y++) {
+	    if (map_hdsc[y][0] == 0) {
+		//
+		// HSCRL == 0
+		//
 		for(int x = 0; x < 40; x++) {
 			uint16_t src1 = (map_addr[y][x]         ) | ex;
 			uint16_t src2 = (map_addr[y][x] ^ 0x2000) | ex;
@@ -1730,6 +1756,57 @@ void CRTC::draw_320x200x256screen(int ymax)
 			cg[dest2 + 14] = cg[dest2 + 15] = cg_matrix0[B0][R0][7] | cg_matrix1[G0][I0][7] | cg_matrix2[B1][R1][7] | cg_matrix3[G1][I1][7];
 		}
 		dest += to_nextline;
+	    } else {
+		//
+		// HSCRL != 0
+		//
+		uint32_t dest2;
+		for(int i = 0; i < map_hdsc[y][0]; i++) {
+			cg[dest+i] = cg_matrix2[0xFF][0xFF][0] | cg_matrix3[0xFF][0xFF][0];
+		}
+		dest2 = dest + map_hdsc[y][0];
+		for(int x = 0; x < 40; x++) {
+			uint16_t src1 = (map_addr[y][x]         ) | ex;
+			
+			B1 = (cg_mask256 & 0x01) ? vram_b[src1] : 0;
+			R1 = (cg_mask256 & 0x02) ? vram_r[src1] : 0;
+			G1 = (cg_mask256 & 0x04) ? vram_g[src1] : 0;
+			I1 = (cg_mask256 & 0x08) ? vram_i[src1] : 0;
+			
+			cg[dest2     ] = cg[dest2 +  1] = cg_matrix2[B1][R1][0] | cg_matrix3[G1][I1][0];
+			cg[dest2 +  2] = cg[dest2 +  3] = cg_matrix2[B1][R1][1] | cg_matrix3[G1][I1][1];
+			cg[dest2 +  4] = cg[dest2 +  5] = cg_matrix2[B1][R1][2] | cg_matrix3[G1][I1][2];
+			cg[dest2 +  6] = cg[dest2 +  7] = cg_matrix2[B1][R1][3] | cg_matrix3[G1][I1][3];
+			cg[dest2 +  8] = cg[dest2 +  9] = cg_matrix2[B1][R1][4] | cg_matrix3[G1][I1][4];
+			cg[dest2 + 10] = cg[dest2 + 11] = cg_matrix2[B1][R1][5] | cg_matrix3[G1][I1][5];
+			cg[dest2 + 12] = cg[dest2 + 13] = cg_matrix2[B1][R1][6] | cg_matrix3[G1][I1][6];
+			cg[dest2 + 14] = cg[dest2 + 15] = cg_matrix2[B1][R1][7] | cg_matrix3[G1][I1][7];
+			dest2 += 16;
+		}
+		for(int x = 0; x < 40; x++) {
+			uint16_t src2 = (map_addr[y][x] ^ 0x2000) | ex;
+			
+			B0 = (cg_mask256 & 0x10) ? vram_b[src2] : 0;
+			R0 = (cg_mask256 & 0x20) ? vram_r[src2] : 0;
+			G0 = (cg_mask256 & 0x40) ? vram_g[src2] : 0;
+			I0 = (cg_mask256 & 0x80) ? vram_i[src2] : 0;
+			
+			cg[dest     ] = cg[dest +  1] |= cg_matrix0[B0][R0][0] | cg_matrix1[G0][I0][0];
+			cg[dest +  2] = cg[dest +  3] |= cg_matrix0[B0][R0][1] | cg_matrix1[G0][I0][1];
+			cg[dest +  4] = cg[dest +  5] |= cg_matrix0[B0][R0][2] | cg_matrix1[G0][I0][2];
+			cg[dest +  6] = cg[dest +  7] |= cg_matrix0[B0][R0][3] | cg_matrix1[G0][I0][3];
+			cg[dest +  8] = cg[dest +  9] |= cg_matrix0[B0][R0][4] | cg_matrix1[G0][I0][4];
+			cg[dest + 10] = cg[dest + 11] |= cg_matrix0[B0][R0][5] | cg_matrix1[G0][I0][5];
+			cg[dest + 12] = cg[dest + 13] |= cg_matrix0[B0][R0][6] | cg_matrix1[G0][I0][6];
+			cg[dest + 14] = cg[dest + 15] |= cg_matrix0[B0][R0][7] | cg_matrix1[G0][I0][7];
+			dest += 16;
+		}
+		dest2 = dest;
+		for(int i = 0; i < map_hdsc[y][0]; i++) {
+			cg[dest2++] = 0;
+		}
+		dest += to_nextline;
+	    }
 	}
 }
 
@@ -1739,6 +1816,7 @@ void CRTC::draw_640x200x16screen(uint8_t pl)
 	uint32_t dest = 0;
 	uint16_t ex;
 	uint16_t subplane;
+	int hscrl;
 	
 	if(map_init) {
 		create_addr_map(80, 200);
@@ -1746,9 +1824,17 @@ void CRTC::draw_640x200x16screen(uint8_t pl)
 	ex = (cgreg[0x0e] & 0x80) << 7;
 	subplane = (pl & 1) ? 0x4000 : 0x0000; // thanks Mr.856
 	for(int y = 0; y < 200; y++) {
+		if ((pl & 1) == 0) {
+			hscrl = map_hdsc[y][0];
+			for(int i = 0; i < hscrl; i++) {
+				cg[dest+i] = 15;
+			}
+		} else {
+			hscrl = 0;
+		}
 		for(int x = 0; x < 80; x++) {
 			uint16_t src = (map_addr[y][x] ^ subplane) | ex;
-			uint32_t dest2 = dest + map_hdsc[y][x];
+			uint32_t dest2 = dest + hscrl;
 			dest += 8;
 			
 			B = (cgreg[0x18] & 0x01) ? vram_b[src] : 0;
@@ -1765,6 +1851,9 @@ void CRTC::draw_640x200x16screen(uint8_t pl)
 			cg[dest2 + 6] = cg_matrix0[B][R][6] | cg_matrix1[G][I][6];
 			cg[dest2 + 7] = cg_matrix0[B][R][7] | cg_matrix1[G][I][7];
 		}
+		for(int i = 0; i < hscrl; i++) {
+			cg[dest+i] = 0;
+		}
 		dest += 640;
 	}
 }
@@ -1778,6 +1867,9 @@ void CRTC::draw_640x400x4screen()
 		create_addr_map(80, 400);
 	}
 	for(int y = 0; y < 400; y++) {
+		for(uint8_t i = 0; i < map_hdsc[y][0]; i++) {
+			cg[dest+i] = 15;
+		}
 		for(int x = 0; x < 80; x++) {
 			uint16_t src = map_addr[y][x];
 			uint32_t dest2 = dest + map_hdsc[y][x];
@@ -1807,9 +1899,13 @@ void CRTC::draw_640x400x16screen()
 		create_addr_map(80, 400);
 	}
 	for(int y = 0; y < 400; y++) {
+		for(uint8_t i = 0; i < map_hdsc[y][0]; i++) {
+			cg[dest+i] = 15;
+		}
 		for(int x = 0; x < 80; x++) {
 			uint16_t src = map_addr[y][x];
 			uint32_t dest2 = dest + map_hdsc[y][x];
+
 			dest += 8;
 			
 			B = vram_b[src];

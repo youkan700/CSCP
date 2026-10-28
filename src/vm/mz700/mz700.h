@@ -19,7 +19,7 @@
 #else
 #define DEVICE_NAME		"SHARP MZ-700 (NTSC)"
 #define CONFIG_NAME		"mz700"
-#define NORA_VER                "1.03"
+#define NORA_VER                "1.04"
 #endif
 #elif defined(_MZ800)
 #define DEVICE_NAME		"SHARP MZ-800"
@@ -28,7 +28,7 @@
 #elif defined(_MZ1500)
 #define DEVICE_NAME		"SHARP MZ-1500"
 #define CONFIG_NAME		"mz1500"
-#define NORA_VER                "1.03"
+#define NORA_VER                "1.04"
 #endif
 
 // device informations for virtual machine
